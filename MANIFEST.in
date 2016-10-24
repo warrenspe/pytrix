@@ -1,0 +1,4 @@
+include setup.cfg setup.py
+include LICENSE README.md MANIFEST.in
+include pytrix/pytrix.c
+recursive-include pytrix *.c *.py *.h

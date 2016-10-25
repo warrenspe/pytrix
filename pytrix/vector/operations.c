@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+PyObject *vectorRepr(Vector *);
 PyObject *vectorDot(Vector *, Vector *);
 PyObject *vectorCross(Vector *, Vector *);
 PyObject *vectorLength(Vector *);
@@ -29,6 +30,33 @@ PyObject *vectorDiv(PyObject *, PyObject *);
 PyObject *vectorNeg(Vector *);
 PyObject *vectorRichCmp(PyObject *, PyObject *, int);
 int vectorTrue(Vector *);
+
+PyObject *vectorRepr(Vector *self) {
+    char *cRepr;
+    PyObject *tuple,
+             *tupleRepr,
+             *vectorRepr;
+
+    if ((tuple = _vectorToTuple(self)) == NULL)
+        return NULL;
+
+    tupleRepr = PyObject_Repr(tuple);
+    Py_DECREF(tuple);
+
+    if (tupleRepr == NULL)
+        return NULL;
+
+    if ((cRepr = PyString_AsString(tupleRepr)) == NULL) {
+        Py_DECREF(tupleRepr);
+        return NULL;
+    }
+
+    vectorRepr = PyString_FromFormat("<Vector %s>", cRepr);
+    Py_DECREF(tupleRepr);
+
+    return vectorRepr;
+}
+
 
 PyObject *vectorDot(Vector *self, Vector *other) {
     VECTOR_TYPE product = _vectorDot(self, other);

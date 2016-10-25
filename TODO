@@ -15,3 +15,5 @@ remove toTuple, implement iterator protocol
 make an iter to an obj, then delete it - what does iter.next do
 
 check refcount of new objects
+
+allow vector to be multiplied by matrix

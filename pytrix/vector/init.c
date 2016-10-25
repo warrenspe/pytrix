@@ -16,17 +16,15 @@
  */
 
 
-static int vectorInit(Vector *, PyObject *, PyObject *);
+static int vectorInit(Vector *, PyObject *);
 static void vectorDeInit(Vector *);
 
-static int vectorInit(Vector *self, PyObject *args, PyObject *kwargs) {
+static int vectorInit(Vector *self, PyObject *args) {
     PyObject *iterable = NULL,
              *item = NULL;
-    unsigned char columnVector = 1;
     unsigned int i;
-    static char *kwargList[] = {"iterable", "columnVector", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|Ob", kwargList, &iterable, &columnVector))
+    if (!PyArg_ParseTuple(args, "O", &iterable))
         return -1;
 
     if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL) {
@@ -39,13 +37,6 @@ static int vectorInit(Vector *self, PyObject *args, PyObject *kwargs) {
     }
 
     self->dimensions = PySequence_Fast_GET_SIZE(iterable);
-    if (columnVector) {
-        self->height = self->dimensions;
-        self->width = 1;
-    } else {
-        self->height = 1;
-        self->width = self->dimensions;
-    }
     self->data = PyMem_New(VECTOR_TYPE, self->dimensions);
 
     if (self->data == NULL) {

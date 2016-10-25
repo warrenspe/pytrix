@@ -30,8 +30,6 @@
     // Struct Definitions
     typedef struct {
         PyObject_HEAD
-        unsigned int height;
-        unsigned int width;
         unsigned int dimensions;
         VECTOR_TYPE *data;
 
@@ -69,6 +67,32 @@
 
 
     // Vector Functions
+    static PyNumberMethods VectorNumberMethods = {
+        (binaryfunc)vectorAdd,
+        (binaryfunc)vectorSub,
+        (binaryfunc)vectorMul,
+        (binaryfunc)vectorDiv,
+        0,
+        0,
+        0,
+        (unaryfunc)vectorNeg,
+        0,
+        0,
+        (inquiry)vectorTrue,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    };
+
     static PyMethodDef VectorMethods[] = {
         {"copy", (PyCFunction)vectorCopy, METH_NOARGS,
             PyDoc_STR("Creates a copy of this vector.")},
@@ -84,8 +108,6 @@
             PyDoc_STR("Determine if this vector is a unit vector.")},
         {"angleBetween", (PyCFunction)vectorAngleBetween, METH_O,
             PyDoc_STR("Calculate the angle between this vector and another vector.")},
-        {"transpose", (PyCFunction)vectorTranspose, METH_NOARGS,
-            PyDoc_STR("Creates an equivalent row vector from a column vector and vice versa.")},
         {NULL}  // Sentinel
     };
 

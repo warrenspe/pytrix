@@ -16,12 +16,21 @@
  */
 
 VECTOR_TYPE *_newVectorData(unsigned int);
-Vector *_vectorNew(unsigned int, unsigned int, unsigned int);
+Vector *_vectorNew(unsigned int);
 Vector *_vectorCopy(Vector *);
+unsigned int _assertVectorDimensionsEqual(Vector *, Vector *);
+unsigned int _assertVector(PyObject *);
+
 PyObject *_vectorToTuple(Vector *);
 double _vectorDot(Vector *, Vector *);
 double _vectorLength(Vector *);
-
+Vector *_vectorAdd(Vector *, Vector *);
+Vector *_vectorSub(Vector *, Vector *);
+Vector *_vectorMul(Vector *, VECTOR_TYPE);
+Vector *_vectorDiv(Vector *, VECTOR_TYPE);
+Vector *_vectorNeg(Vector *);
+unsigned char _vectorTrue(Vector *);
+unsigned char _vectorsEqual(Vector *, Vector *);
 
 VECTOR_TYPE *_newVectorData(unsigned int dimensions) {
 /*  Construct a data buffer for a new vector.
@@ -37,7 +46,7 @@ VECTOR_TYPE *_newVectorData(unsigned int dimensions) {
 }
 
 
-Vector *_vectorNew(unsigned int dimensions, unsigned int height, unsigned int width) {
+Vector *_vectorNew(unsigned int dimensions) {
     PyObject *PyVector;
     Vector *newVector;
     VECTOR_TYPE *data;
@@ -55,8 +64,6 @@ Vector *_vectorNew(unsigned int dimensions, unsigned int height, unsigned int wi
     }
 
     newVector->dimensions = dimensions;
-    newVector->height = height;
-    newVector->width = width;
     newVector->data = data;
 
     PyVector = PyObject_Init((PyObject *)newVector, &VectorType);
@@ -66,7 +73,7 @@ Vector *_vectorNew(unsigned int dimensions, unsigned int height, unsigned int wi
 
 
 Vector *_vectorCopy(Vector *v) {
-    Vector *copy = _vectorNew(v->dimensions, v->height, v->width);
+    Vector *copy = _vectorNew(v->dimensions);
 
     if (copy == NULL)
         return NULL;
@@ -76,6 +83,25 @@ Vector *_vectorCopy(Vector *v) {
     return copy;
 }
 
+
+unsigned int _assertVectorDimensionsEqual(Vector *self, Vector *other) {
+    if (self->dimensions != other->dimensions) {
+        PyErr_SetString(PyExc_ValueError, "Vectors must be of the same dimensions.");
+        return 0;
+    }
+
+    return 1;
+}
+
+
+unsigned int _assertVector(PyObject *toCheck) {
+    if (!Vector_Check(toCheck)) {
+        PyErr_Format(PyExc_TypeError, "Given object is not a Vector: \"%.400s\"", Py_TYPE(toCheck)->tp_name);
+        return 0;
+    }
+
+    return 1;
+}
 
 PyObject *_vectorToTuple(Vector *self) {
     PyObject *tuple;
@@ -114,11 +140,8 @@ double _vectorDot(Vector *self, Vector *other) {
     VECTOR_TYPE product = 0;
     unsigned int i;
 
-    // Ensure the two vectors are of the same dimensions
-    if (self->dimensions != other->dimensions) {
-        PyErr_SetString(PyExc_ValueError, "Vectors must be of the same length in order to perform dot product.");
+    if (!_assertVectorDimensionsEqual(self, other))
         return 0;
-    }
 
     for (i = 0; i < self->dimensions; i++) {
         product += *(self->data + i) * *(other->data + i);
@@ -130,4 +153,95 @@ double _vectorDot(Vector *self, Vector *other) {
 
 double _vectorLength(Vector *self) {
     return sqrt(_vectorDot(self, self));
+}
+
+
+Vector *_vectorAdd(Vector *self, Vector *other) {
+    Vector *sum;
+    unsigned int i;
+
+    if (!_assertVectorDimensionsEqual(self, other))
+        return NULL;
+
+    if ((sum = _vectorNew(self->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < self->dimensions; i++)
+        Vector_SetValue(sum, i, Vector_GetValue(self, i) + Vector_GetValue(other, i));
+
+    return sum;
+}
+
+
+Vector *_vectorSub(Vector *self, Vector *other) {
+    Vector *difference;
+    unsigned int i;
+
+    if (!_assertVectorDimensionsEqual(self, other))
+        return NULL;
+
+    if ((difference = _vectorNew(self->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < self->dimensions; i++)
+        Vector_SetValue(difference, i, Vector_GetValue(self, i) - Vector_GetValue(other, i));
+
+    return difference;
+}
+
+
+Vector *_vectorMul(Vector *self, VECTOR_TYPE multiplier) {
+    Vector *product;
+    unsigned int i;
+
+    if ((product = _vectorNew(self->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < self->dimensions; i++)
+        Vector_SetValue(product, i, Vector_GetValue(self, i) * multiplier);
+
+    return product;
+}
+
+
+Vector *_vectorDiv(Vector *self, VECTOR_TYPE divisor) {
+    Vector *quotient;
+    unsigned int i;
+
+    if ((quotient = _vectorNew(self->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < self->dimensions; i++)
+        Vector_SetValue(quotient, i, Vector_GetValue(self, i) / divisor);
+
+    return quotient;
+}
+
+
+Vector *_vectorNeg(Vector *self) {
+    Vector *neg;
+    unsigned int i;
+
+    if ((neg = _vectorNew(self->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < self->dimensions; i++)
+        Vector_SetValue(neg, i, -Vector_GetValue(self, i));
+
+    return neg;
+}
+
+
+unsigned char _vectorsEqual(Vector *self, Vector *other) {
+    unsigned int i;
+
+    if (self->dimensions != other->dimensions)
+        return 0;
+
+    for (i = 0; i < self->dimensions; i++) {
+        if (Vector_GetValue(self, i) != Vector_GetValue(other, i))
+            return 0;
+    }
+
+    return 1;
 }

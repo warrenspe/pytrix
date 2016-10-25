@@ -16,11 +16,13 @@
  */
 
 // Vector Macros
+#define Vector_Check(op) (Py_TYPE(op) == &VectorType)
 #define Vector_GetValue(vector, idx) (*((vector->data) + idx))
 #define Vector_SetValue(vector, idx, val) Vector_GetValue(vector, idx) = val
 
 
 // Matrix Macros
+#define Matrix_Check(op) (Py_TYPE(op) == &MatrixType)
 #define Matrix_Index(matrix, row, col) ((matrix->width) * row + col)
 #define Matrix_GetValue(matrix, row, col) (*((matrix->data) + Matrix_Index(matrix, row, col)))
 #define Matrix_SetValue(matrix, row, col, val) Matrix_GetValue(matrix, row, col) = val

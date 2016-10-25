@@ -19,8 +19,6 @@
 #include "vector/iter.c"
 
 static PyMemberDef VectorMembers[] = {
-    {"height", T_UINT, offsetof(Vector, height), READONLY, "Height of the vector."},
-    {"width", T_UINT, offsetof(Vector, width), READONLY, "Width of the vector."},
     {"dimensions", T_UINT, offsetof(Vector, dimensions), READONLY, "Number of dimensions of the vector."},
     {NULL} // Sentinel
 };
@@ -45,7 +43,7 @@ static PyTypeObject VectorType = {
     0,                         /*tp_getattro TODO?*/
     0,                         /*tp_setattro TODO?*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES,        /*tp_flags*/
     "Object representing a Vector.",
     0,                     /* tp_traverse */
     0,                     /* tp_clear */

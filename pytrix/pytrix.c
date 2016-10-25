@@ -29,6 +29,8 @@ void initTypes(PyObject *module) {
 
 
     VectorType.tp_methods = VectorMethods;
+    VectorType.tp_as_number = &VectorNumberMethods;
+    VectorType.tp_richcompare = vectorRichCmp;
     MatrixType.tp_methods = MatrixMethods;
 
     if (PyType_Ready(&VectorType) < 0)

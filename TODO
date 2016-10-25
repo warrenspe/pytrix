@@ -13,3 +13,5 @@ de-init - need to decref self?
 remove toTuple, implement iterator protocol
 
 make an iter to an obj, then delete it - what does iter.next do
+
+check refcount of new objects

@@ -19,14 +19,10 @@
 #include "headers/pytrix.h"
 
 void initTypes(PyObject *module) {
-/* API function which serializes a python object.
+/* Initialize the Vector, Matrix & VectorIter types.
  *
- * Inputs: self - Unused. The required `self` parameter of any python-visible function.
- *         args - Positional arguments passed to the function.
- *
- * Outputs: A Python string containing the serialized value of the passed object, or NULL if an error occurs.
+ * Inputs: module - The module object we will attach the types to.
  */
-
 
     VectorType.tp_methods = VectorMethods;
     VectorType.tp_as_number = &VectorNumberMethods;
@@ -53,6 +49,7 @@ static PyMethodDef pytrixMethods[] = {
      {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
+
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef pytrixDef = {
     PyModuleDef_HEAD_INIT,
@@ -65,7 +62,6 @@ static struct PyModuleDef pytrixDef = {
     NULL,
     NULL
 };
-
 
 PyMODINIT_FUNC PyInit_pytrix(void) {
     PyObject *module = PyModule_Create(&pytrixDef);

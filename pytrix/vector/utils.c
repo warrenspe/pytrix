@@ -15,45 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-VECTOR_TYPE *_newVectorData(unsigned int);
 Vector *_vectorNew(unsigned int);
 Vector *_vectorCopy(Vector *);
 unsigned int _assertVectorDimensionsEqual(Vector *, Vector *);
 unsigned int _assertVector(PyObject *);
 
 PyObject *_vectorToTuple(Vector *);
-double _vectorDot(Vector *, Vector *);
-double _vectorLength(Vector *);
+VECTOR_TYPE _vectorDot(Vector *, Vector *);
+VECTOR_TYPE _vectorLength(Vector *);
 Vector *_vectorAdd(Vector *, Vector *);
 Vector *_vectorSub(Vector *, Vector *);
 Vector *_vectorMul(Vector *, VECTOR_TYPE);
 Vector *_vectorDiv(Vector *, VECTOR_TYPE);
 Vector *_vectorNeg(Vector *);
-unsigned char _vectorTrue(Vector *);
 unsigned char _vectorsEqual(Vector *, Vector *);
 
-VECTOR_TYPE *_newVectorData(unsigned int dimensions) {
-/*  Construct a data buffer for a new vector.
+Vector *_vectorNew(unsigned int dimensions) {
+/*  Creates a new vector objects with the given number of dimensions.
 
-    Inputs: dimensions - The number of dimensions the buffer needs to be able to hold data for.
+    Inputs: dimensions - The number of dimensions to create the new vector object with.
 
-    Outputs: Either a VECTOR_TYPE pointer to the newly created buffer or NULL if unsuccessful.
+    Outputs: A pointer to a Vector object.
 */
 
-    VECTOR_TYPE *data = PyMem_New(VECTOR_TYPE, dimensions);
-
-    return data;
-}
-
-
-Vector *_vectorNew(unsigned int dimensions) {
-    PyObject *PyVector;
     Vector *newVector;
     VECTOR_TYPE *data;
 
-    data = _newVectorData(dimensions);
-
-    if (data == NULL)
+    if ((data = PyMem_New(VECTOR_TYPE, dimensions)) == NULL)
         return NULL;
 
     newVector = PyObject_New(Vector, &VectorType);
@@ -66,13 +54,18 @@ Vector *_vectorNew(unsigned int dimensions) {
     newVector->dimensions = dimensions;
     newVector->data = data;
 
-    PyVector = PyObject_Init((PyObject *)newVector, &VectorType);
-
-    return (Vector *)PyVector;
+    return (Vector *)PyObject_Init((PyObject *)newVector, &VectorType);
 }
 
 
 Vector *_vectorCopy(Vector *v) {
+/*  Creates a new copy of the given vector.
+
+    Inputs: v - The vector to copy.
+
+    Outputs: A Vector object with the same number of dimensions and data as v, or NULL if an exception occurred.
+*/
+
     Vector *copy = _vectorNew(v->dimensions);
 
     if (copy == NULL)
@@ -84,8 +77,16 @@ Vector *_vectorCopy(Vector *v) {
 }
 
 
-unsigned int _assertVectorDimensionsEqual(Vector *self, Vector *other) {
-    if (self->dimensions != other->dimensions) {
+unsigned int _assertVectorDimensionsEqual(Vector *a, Vector *b) {
+/*  Asserts that two vectors are equal.  Sets a PyError if they are not.
+
+    Inputs: a - A pointer to the first Vector.
+            b - A pointer to the second Vector.
+
+    Outputs: 1 if the two vectors have the same number of dimensions, else 0.
+*/
+
+    if (a->dimensions != b->dimensions) {
         PyErr_SetString(PyExc_ValueError, "Vectors must be of the same dimensions.");
         return 0;
     }
@@ -95,6 +96,13 @@ unsigned int _assertVectorDimensionsEqual(Vector *self, Vector *other) {
 
 
 unsigned int _assertVector(PyObject *toCheck) {
+/*  Asserts that the given PyObject is a Vector object.
+
+    Inputs: toCheck - A PyObject to test if whether or not it is a Vector.
+
+    Outputs: 1 if toCheck is a Vector, else 0.
+*/
+
     if (!Vector_Check(toCheck)) {
         PyErr_Format(PyExc_TypeError, "Given object is not a Vector: \"%.400s\"", Py_TYPE(toCheck)->tp_name);
         return 0;
@@ -103,7 +111,16 @@ unsigned int _assertVector(PyObject *toCheck) {
     return 1;
 }
 
+
 PyObject *_vectorToTuple(Vector *self) {
+/*  Constructs a PyTuple from the given vector where the i-th index of the tuple contains the i-th dimension component
+    of the vector.
+
+    Inputs: self - The vector to convert to a PyTuple.
+
+    Outputs: A PyTuple corresponding to self if successful, else sets a PyError and returns NULL.
+*/
+
     PyObject *tuple;
     unsigned int i;
     PyObject *item;
@@ -126,13 +143,13 @@ PyObject *_vectorToTuple(Vector *self) {
 }
 
 
-double _vectorDot(Vector *self, Vector *other) {
-/*  Calculates the dot product of this vector with another.
+VECTOR_TYPE _vectorDot(Vector *a, Vector *b) {
+/*  Calculates the dot product of two vectors.
 
-    Inputs: self  - This Vector object.
-            other - The other Vector object.
+    Inputs: a - The first Vector object.
+            b - The second Vector object.
 
-    Outputs: A double representing the dot product of the two vectors.
+    Outputs: A VECTOR_TYPE representing the dot product of the two vectors.
 
     Note: Calling functions should test whether an error was set using PyErr_Occurred().
 */
@@ -140,57 +157,87 @@ double _vectorDot(Vector *self, Vector *other) {
     VECTOR_TYPE product = 0;
     unsigned int i;
 
-    if (!_assertVectorDimensionsEqual(self, other))
+    if (!_assertVectorDimensionsEqual(a, b))
         return 0;
 
-    for (i = 0; i < self->dimensions; i++) {
-        product += *(self->data + i) * *(other->data + i);
-    }
+    for (i = 0; i < a->dimensions; i++)
+        product += Vector_GetValue(a, i) * Vector_GetValue(b, i);
 
     return product;
 }
 
 
-double _vectorLength(Vector *self) {
+VECTOR_TYPE _vectorLength(Vector *self) {
+/*  Returns the length of a vector.
+
+    Inputs: self - The vector to determine the length of.
+
+    Outputs: A VECTOR_TYPE containing the length of the vector.
+*/
+
     return sqrt(_vectorDot(self, self));
 }
 
 
-Vector *_vectorAdd(Vector *self, Vector *other) {
+Vector *_vectorAdd(Vector *a, Vector *b) {
+/*  Adds the components of two vectors together to construct a third vector.
+
+    Inputs: a - The first vector to add.
+            b - The second vector to add.
+
+    Outputs: A new third vector constructed by performing a + b.
+*/
+
     Vector *sum;
     unsigned int i;
 
-    if (!_assertVectorDimensionsEqual(self, other))
+    if (!_assertVectorDimensionsEqual(a, b))
         return NULL;
 
-    if ((sum = _vectorNew(self->dimensions)) == NULL)
+    if ((sum = _vectorNew(a->dimensions)) == NULL)
         return NULL;
 
-    for (i = 0; i < self->dimensions; i++)
-        Vector_SetValue(sum, i, Vector_GetValue(self, i) + Vector_GetValue(other, i));
+    for (i = 0; i < sum->dimensions; i++)
+        Vector_SetValue(sum, i, Vector_GetValue(a, i) + Vector_GetValue(b, i));
 
     return sum;
 }
 
 
-Vector *_vectorSub(Vector *self, Vector *other) {
+Vector *_vectorSub(Vector *a, Vector *b) {
+/*  Subtracts the components of two vectors together to construct a third vector.
+
+    Inputs: a - The first vector to subtract from.
+            b - The second vector to use to subtract from a.
+
+    Outputs: A new third vector constructed by performing a - b.
+*/
+
     Vector *difference;
     unsigned int i;
 
-    if (!_assertVectorDimensionsEqual(self, other))
+    if (!_assertVectorDimensionsEqual(a, b))
         return NULL;
 
-    if ((difference = _vectorNew(self->dimensions)) == NULL)
+    if ((difference = _vectorNew(a->dimensions)) == NULL)
         return NULL;
 
-    for (i = 0; i < self->dimensions; i++)
-        Vector_SetValue(difference, i, Vector_GetValue(self, i) - Vector_GetValue(other, i));
+    for (i = 0; i < difference->dimensions; i++)
+        Vector_SetValue(difference, i, Vector_GetValue(a, i) - Vector_GetValue(b, i));
 
     return difference;
 }
 
 
 Vector *_vectorMul(Vector *self, VECTOR_TYPE multiplier) {
+/*  Multiplies the components of a vector by a scalar to construct a new vector.
+
+    Inputs: self       - The vector to be multiplied by multiplier.
+            multiplier - The scalar to multiply self by.
+
+    Outputs: A new Vector object constructed by performing self * multiplier.
+*/
+
     Vector *product;
     unsigned int i;
 
@@ -205,6 +252,14 @@ Vector *_vectorMul(Vector *self, VECTOR_TYPE multiplier) {
 
 
 Vector *_vectorDiv(Vector *self, VECTOR_TYPE divisor) {
+/*  Divides the components of a vector by a scalar to construct a new vector.
+
+    Inputs: self    - The vector to be divided by divisor.
+            divisor - The scalar to divide self by.
+
+    Outputs: A new Vector object constructed by performing self / divisor.
+*/
+
     Vector *quotient;
     unsigned int i;
 
@@ -219,6 +274,13 @@ Vector *_vectorDiv(Vector *self, VECTOR_TYPE divisor) {
 
 
 Vector *_vectorNeg(Vector *self) {
+/*  Negates the components of a vector to construct a new vector.
+
+    Inputs: self - The vector to negate.
+
+    Outputs: A new Vector object constructed by negating the components of self.
+*/
+
     Vector *neg;
     unsigned int i;
 
@@ -232,14 +294,22 @@ Vector *_vectorNeg(Vector *self) {
 }
 
 
-unsigned char _vectorsEqual(Vector *self, Vector *other) {
+unsigned char _vectorsEqual(Vector *a, Vector *b) {
+/*  Tests if the components of two vectors are equal.
+
+    Inputs: a - The first vector to compare with.
+            b - The second vector to compare with.
+
+    Outputs: 1 If the components in a and b are pairwise equal, else 0.
+*/
+
     unsigned int i;
 
-    if (self->dimensions != other->dimensions)
+    if (a->dimensions != b->dimensions)
         return 0;
 
-    for (i = 0; i < self->dimensions; i++) {
-        if (Vector_GetValue(self, i) != Vector_GetValue(other, i))
+    for (i = 0; i < a->dimensions; i++) {
+        if (Vector_GetValue(a, i) != Vector_GetValue(b, i))
             return 0;
     }
 

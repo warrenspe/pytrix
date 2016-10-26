@@ -23,6 +23,9 @@ static PyMemberDef VectorMembers[] = {
     {NULL} // Sentinel
 };
 
+/* NOTES:
+        * Vectors are immutable; when operations are performed on them new vectors are created.
+*/
 static PyTypeObject VectorType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "pytrix.Vector",

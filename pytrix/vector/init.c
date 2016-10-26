@@ -20,28 +20,33 @@ static int vectorInit(Vector *, PyObject *);
 static void vectorDeInit(Vector *);
 
 static int vectorInit(Vector *self, PyObject *args) {
+/*  Initializes a vector from a sequence.
+
+    Inputs: self - The Vector being initialized.
+            args - A packed version of the arguments passed to the initializer.
+
+    Outputs: 0 If successful, else -1
+*/
+
+    unsigned int i;
     PyObject *iterable = NULL,
              *item = NULL;
-    unsigned int i;
 
     if (!PyArg_ParseTuple(args, "O", &iterable))
         return -1;
 
-    if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL) {
+    if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL)
         return -1;
-    }
 
     // If we have already been initialized, free the memory reserved in our data variable before it is reinitialized
-    if (self->data != NULL) {
+    if (self->data != NULL)
         vectorDeInit(self);
-    }
 
     self->dimensions = PySequence_Fast_GET_SIZE(iterable);
     self->data = PyMem_New(VECTOR_TYPE, self->dimensions);
 
-    if (self->data == NULL) {
+    if (self->data == NULL)
         return -1;
-    }
 
     // Initialize self->data from the given iterable
     for (i = 0; i < self->dimensions; i++) {
@@ -56,6 +61,9 @@ static int vectorInit(Vector *self, PyObject *args) {
     return 0;
 }
 
+
 static void vectorDeInit(Vector *self) {
+    /* De-allocates a vector. */
+
     PyMem_Free(self->data);
 }

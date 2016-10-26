@@ -16,10 +16,10 @@
  */
 
 PyObject *vectorRepr(Vector *);
-PyObject *vectorDot(Vector *, Vector *);
-PyObject *vectorCross(Vector *, Vector *);
+PyObject *vectorDot(Vector *, PyObject *);
+PyObject *vectorCross(Vector *, PyObject *);
 PyObject *vectorLength(Vector *);
-PyObject *vectorAngleBetween(Vector *, Vector *);
+PyObject *vectorAngleBetween(Vector *, PyObject *);
 PyObject *vectorUnit(Vector *);
 PyObject *vectorIsUnit(Vector *);
 PyObject *vectorCopy(Vector *);
@@ -28,10 +28,18 @@ PyObject *vectorSub(PyObject *, PyObject *);
 PyObject *vectorMul(PyObject *, PyObject *);
 PyObject *vectorDiv(PyObject *, PyObject *);
 PyObject *vectorNeg(Vector *);
+PyObject *vectorOrthogonal(Vector *, PyObject *);
 PyObject *vectorRichCmp(PyObject *, PyObject *, int);
 int vectorTrue(Vector *);
 
 PyObject *vectorRepr(Vector *self) {
+/*  Constructs a Python String representing a human readable version of this vector.
+
+    Inputs: self - The vector for which the human readable format will be produced.
+
+    Outputs: A PyString containing the human readable form of the vector.
+*/
+
     char *cRepr;
     PyObject *tuple,
              *tupleRepr,
@@ -58,8 +66,20 @@ PyObject *vectorRepr(Vector *self) {
 }
 
 
-PyObject *vectorDot(Vector *self, Vector *other) {
-    VECTOR_TYPE product = _vectorDot(self, other);
+PyObject *vectorDot(Vector *self, PyObject *other) {
+/*  Calculates the dot product of this vector with another of the same dimensions.
+
+    Inputs: self  - The first Vector in the dot product.
+            other - Supposedly the other Vector in the dot product.  However - this can be anything, so
+                    we have to check that it's a vector before we can go and use it.
+
+    Outputs: A PyFloat containing the value of self * other if successful, else an Exception is raised.
+*/
+
+    if (!_assertVector(other))
+        return NULL;
+
+    VECTOR_TYPE product = _vectorDot(self, (Vector *)other);
     if (PyErr_Occurred() == NULL)
         return PyFloat_FromDouble(product);
 
@@ -67,11 +87,26 @@ PyObject *vectorDot(Vector *self, Vector *other) {
 }
 
 
-PyObject *vectorCross(Vector *self, Vector *other) {
-    Vector *cross;
+PyObject *vectorCross(Vector *self, PyObject *otherPy) {
+/*  Calculates the cross product of this vector with another, both being 3 dimensional.
+
+    Inputs: self  - The first Vector in the cross product.
+            other - Supposedly the other Vector in the cross product.  However - this can be anything, so
+                    we have to check that it's a vector before we can go and use it.
+
+    Outputs: A Vector containing the value of self x other if successful, else an Exception is raised.
+*/
+
+    Vector *cross,
+           *other;
     VECTOR_TYPE a,
                 b,
                 c;
+
+    if (!_assertVector(otherPy))
+        return NULL;
+
+    other = (Vector *)otherPy;
 
     if (!_assertVectorDimensionsEqual(self, other))
         return NULL;
@@ -95,28 +130,50 @@ PyObject *vectorCross(Vector *self, Vector *other) {
 
 
 PyObject *vectorLength(Vector *self) {
+/*  Calculates the length of a vector.
+
+    Inputs: self - The vector whose length is being calculated.
+
+    Outputs: A PyFloat containing the length of the object, or an Exception.
+*/
+
     return PyFloat_FromDouble(_vectorLength(self));
 }
 
 
-PyObject *vectorAngleBetween(Vector *self, Vector *other) {
+PyObject *vectorAngleBetween(Vector *self, PyObject *other) {
 /*  Calculates the angle between two vectors in radians.
 
     Inputs: self  - The first vector.
-            other - The second vector.
+            other - Presumably the second vector.  However, this can be any python object so we must validate that it
+                    is a vector before we go ahead and use it.
 
-    Outputs: A float containing the angle between the vectors.
+    Outputs: A PyFloat containing the angle between the vectors.
 */
 
-    VECTOR_TYPE dotProd = _vectorDot(self, other),
-                otherLength = _vectorLength(other),
-                selfLength = _vectorLength(self);
+    VECTOR_TYPE dotProd,
+                otherLength,
+                selfLength;
+
+    if (!_assertVector(other))
+        return NULL;
+
+    dotProd = _vectorDot(self, (Vector *)other);
+    otherLength = _vectorLength((Vector *)other);
+    selfLength = _vectorLength(self);
 
     return PyFloat_FromDouble(acos((dotProd / (selfLength * otherLength))));
 }
 
 
 PyObject *vectorUnit(Vector *self) {
+/*  Creates a new unit vector (vector of length 1) from the given vector.
+
+    Inputs: self - The vector to construct the unit vector from.
+
+    Outputs: A Vector object of length 1 of the same direction as self.
+*/
+
     unsigned int i;
     Vector *unit;
     VECTOR_TYPE length = _vectorLength(self);
@@ -137,6 +194,13 @@ PyObject *vectorUnit(Vector *self) {
 
 
 PyObject *vectorIsUnit(Vector *self) {
+/*  Determines if a vector is a unit vector (has a length of 1).
+
+    Inputs: self - The vector to determine if is a unit vector.
+
+    Outputs: A PyTrue or PyFalse based on the length of self.
+*/
+
     if (_vectorLength(self) == 1)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
@@ -144,11 +208,27 @@ PyObject *vectorIsUnit(Vector *self) {
 
 
 PyObject *vectorCopy(Vector *self) {
+/*  Creates a copy of this vector object.
+
+    Inputs: self - The vector to copy.
+
+    Outputs: A copy of self.
+*/
+
     return (PyObject *)_vectorCopy(self);
 }
 
 
 PyObject *vectorAdd(PyObject *a, PyObject *b) {
+/*  Adds the components of two vectors together to create a new third vector.
+    Note that both arguments must be sanitized, as any python object may be passed.
+
+    Inputs: a - Supposedly the first vector to add.
+            b - Supposedly the second vector to add.
+
+    Outputs: A new vector constructed by performing a + b, or an Exception.
+*/
+
     if ((!_assertVector(a)) || (!_assertVector(b)))
         return NULL;
 
@@ -157,6 +237,15 @@ PyObject *vectorAdd(PyObject *a, PyObject *b) {
 
 
 PyObject *vectorSub(PyObject *a, PyObject *b) {
+/*  Subtracts the components of two vectors to create a new third vector.
+    Note that both arguments must be sanitized, as any python object may be passed.
+
+    Inputs: a - Supposedly the first vector to subtract from.
+            b - Supposedly the second vector to use to subtract from a.
+
+    Outputs: A new vector constructed by performing a - b, or an Exception.
+*/
+
     if ((!_assertVector(a)) || (!_assertVector(b)))
         return NULL;
 
@@ -165,6 +254,17 @@ PyObject *vectorSub(PyObject *a, PyObject *b) {
 
 
 PyObject *vectorMul(PyObject *a, PyObject *b) {
+/*  Multiplies each of the components of a vector by a scalar to create a new vector.
+    Note that both arguments must be sanitized, as any python object may be passed.
+    We expect one of a or b to be a Vector object, and the other object to be a python object implementing the
+    numerical protocol.  They can come in either order.
+
+    Inputs: a - Supposedly either the vector to multiply by b, or the scalar to multiply b with.
+            b - Supposedly either the vector to multiply by a, or the scalar to multiply a with.
+
+    Outputs: A new vector constructed by performing a * b, or an Exception.
+*/
+
     Vector *v;
     VECTOR_TYPE multiplier;
 
@@ -188,6 +288,17 @@ PyObject *vectorMul(PyObject *a, PyObject *b) {
 
 
 PyObject *vectorDiv(PyObject *a, PyObject *b) {
+/*  Divides each of the components of a vector by a scalar to create a new vector.
+    Note that both arguments must be sanitized, as any python object may be passed.
+    We expect a to be the vector object being divided, and the other object to be a python object implementing the
+    numerical protocol.
+
+    Inputs: a - Supposedly either the vector to divide by b.
+            b - Supposedly the scalar to divide a by.
+
+    Outputs: A new vector constructed by performing a / b, or an Exception.
+*/
+
     VECTOR_TYPE divider;
 
     // Assert that the dividend is a vector and the divisor is a scalar
@@ -209,11 +320,55 @@ PyObject *vectorDiv(PyObject *a, PyObject *b) {
 
 
 PyObject *vectorNeg(Vector *self) {
+/*  Negates the components of a vector to create a new vector.
+
+    Inputs: self - The vector to negate.
+
+    Outputs: A new vector with negated components from self.
+*/
+
     return (PyObject *)_vectorNeg(self);
 }
 
 
+PyObject *vectorOrthogonal(Vector *self, PyObject *other) {
+/*  Determines if two vectors are orthogonal.
+
+    Inputs: self  - The first vector.
+            other - Presumably the second vector.  However, this can be any python object so we must validate that it
+                    is a vector before we go ahead and use it.
+
+    Outputs: A PyTrue or PyFalse depending on whether or not self and other are orthogonal.
+*/
+
+    int product;
+
+    if (!_assertVector(other))
+        return NULL;
+
+    product = _vectorDot(self, (Vector *)other);
+
+    if (PyErr_Occurred())
+        return NULL;
+
+    if (product == 0)
+        Py_RETURN_TRUE;
+
+    Py_RETURN_FALSE;
+}
+
+
 PyObject *vectorRichCmp(PyObject *a, PyObject *b, int op) {
+/*  Performs (in)equality checking for vectors.
+    Note that both arguments must be sanitized, as any python object may be passed.  We expect both to be vectors.
+
+    Inputs: a  - The first vector to compare.
+            b  - The second vector to compare.
+            op - An operation code.  See https://docs.python.org/3/c-api/typeobj.html#c.PyTypeObject.tp_richcompare
+
+    Outputs: A PyTrue or PyFalse depending which op code was given and the values of a and b.
+*/
+
     if ((!_assertVector(a)) || (!_assertVector(b)))
         return NULL;
 
@@ -236,7 +391,12 @@ PyObject *vectorRichCmp(PyObject *a, PyObject *b, int op) {
 
 
 int vectorTrue(Vector *self) {
-/*  Returns a 0 if the given vector has a magnitude of 0, else 1. */
+/*  Determines if a vector has a magnitude of 0 or not.
+
+    Inputs: self - The vector to check.
+
+    Outputs: A PyTrue or PyFalse based on whether or not self is a 0 magnitude vector or not.
+*/
 
     unsigned int i;
 

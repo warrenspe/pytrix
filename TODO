@@ -1,19 +1,5 @@
-ENSURE True/False can be passed to vector new
-
-keep a PyObject for dimensions, width, and height on the vector that can be read using https://docs.python.org/2/extending/newtypes.html#generic-attribute-management
-
-prevent strings as argument to vector
-
-python-visible docstrings for all modules & methods
-
-standardized docstrings for all functions
-
-de-init - need to decref self?
-
-remove toTuple, implement iterator protocol
-
-make an iter to an obj, then delete it - what does iter.next do
-
-check refcount of new objects
-
 allow vector to be multiplied by matrix
+
+think about adding a linearComb function to do slightly faster linear combinations
+
+setup line intersection func

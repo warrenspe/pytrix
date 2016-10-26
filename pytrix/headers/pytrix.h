@@ -108,6 +108,8 @@
             PyDoc_STR("Determine if this vector is a unit vector.")},
         {"angleBetween", (PyCFunction)vectorAngleBetween, METH_O,
             PyDoc_STR("Calculate the angle between this vector and another vector.")},
+        {"orthogonal", (PyCFunction)vectorOrthogonal, METH_O,
+            PyDoc_STR("Determines whether or not another vector is orthogonal to this vector.")},
         {NULL}  // Sentinel
     };
 

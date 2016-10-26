@@ -17,14 +17,21 @@
 
 PyObject *vectorIter(Vector *);
 
-PyObject *vectorIter(Vector *v) {
+PyObject *vectorIter(Vector *self) {
+/*  Creates an iterator over ourselves.
+
+    Inputs: self - The vector which will have an iterator constructed for it.
+
+    Outputs: The newly created VectorIter object.
+*/
+
     VectorIter *i = PyObject_GC_New(VectorIter, &VectorIterType);
     if (i == NULL)
         return NULL;
 
-    i->iterating = (PyObject *)v;
+    i->iterating = (PyObject *)self;
     i->i = 0;
     PyObject_GC_Track(i);
-    Py_INCREF(i);
+    Py_INCREF(self);
     return (PyObject *)i;
 }

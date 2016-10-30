@@ -257,11 +257,16 @@ Vector *_vectorDiv(Vector *self, VECTOR_TYPE divisor) {
     Inputs: self    - The vector to be divided by divisor.
             divisor - The scalar to divide self by.
 
-    Outputs: A new Vector object constructed by performing self / divisor.
+    Outputs: A new Vector object constructed by performing self / divisor or NULL if an error occurred.
 */
 
     Vector *quotient;
     unsigned int i;
+
+    if (divisor == 0) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "Division by zero vector.");
+        return NULL;
+    }
 
     if ((quotient = _vectorNew(self->dimensions)) == NULL)
         return NULL;

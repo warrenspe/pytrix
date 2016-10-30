@@ -51,7 +51,8 @@
     } Matrix;
 
 
-    // Macro Includes
+    // Macro & Compatibility Includes
+    #include "headers/py2_3compat.h"
     #include "headers/macros.h"
 
     // Type Includes
@@ -67,6 +68,20 @@
 
 
     // Vector Functions
+    #if PY_MAJOR_VERSION >= 3
+    static PyNumberMethods VectorNumberMethods = {
+        (binaryfunc)vectorAdd,
+        (binaryfunc)vectorSub,
+        (binaryfunc)vectorMul,
+        0,
+        0,
+        0,
+        (unaryfunc)vectorNeg,
+        0,
+        0,
+        (inquiry)vectorTrue,
+    };
+    #else
     static PyNumberMethods VectorNumberMethods = {
         (binaryfunc)vectorAdd,
         (binaryfunc)vectorSub,
@@ -79,19 +94,8 @@
         0,
         0,
         (inquiry)vectorTrue,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
     };
+    #endif
 
     static PyMethodDef VectorMethods[] = {
         {"copy", (PyCFunction)vectorCopy, METH_NOARGS,

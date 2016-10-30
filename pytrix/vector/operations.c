@@ -54,12 +54,12 @@ PyObject *vectorRepr(Vector *self) {
     if (tupleRepr == NULL)
         return NULL;
 
-    if ((cRepr = PyString_AsString(tupleRepr)) == NULL) {
+    if ((cRepr = PyBytes_AsString(tupleRepr)) == NULL) {
         Py_DECREF(tupleRepr);
         return NULL;
     }
 
-    vectorRepr = PyString_FromFormat("<Vector %s>", cRepr);
+    vectorRepr = PyBytes_FromFormat("<Vector %s>", cRepr);
     Py_DECREF(tupleRepr);
 
     return vectorRepr;
@@ -112,9 +112,9 @@ PyObject *vectorCross(Vector *self, PyObject *otherPy) {
         return NULL;
 
     if (self->dimensions == 3) {
-        a = Vector_GetValue(self, 2) * Vector_GetValue(other, 3) - Vector_GetValue(self, 3) * Vector_GetValue(other, 2);
-        b = Vector_GetValue(self, 3) * Vector_GetValue(other, 1) - Vector_GetValue(self, 1) * Vector_GetValue(other, 3);
-        c = Vector_GetValue(self, 1) * Vector_GetValue(other, 2) - Vector_GetValue(self, 2) * Vector_GetValue(other, 1);
+        a = Vector_GetValue(self, 1) * Vector_GetValue(other, 2) - Vector_GetValue(self, 2) * Vector_GetValue(other, 1);
+        b = Vector_GetValue(self, 2) * Vector_GetValue(other, 0) - Vector_GetValue(self, 0) * Vector_GetValue(other, 2);
+        c = Vector_GetValue(self, 0) * Vector_GetValue(other, 1) - Vector_GetValue(self, 1) * Vector_GetValue(other, 0);
         if ((cross = _vectorNew(3)) == NULL)
             return NULL;
         Vector_SetValue(cross, 0, a);
@@ -199,9 +199,11 @@ PyObject *vectorIsUnit(Vector *self) {
     Inputs: self - The vector to determine if is a unit vector.
 
     Outputs: A PyTrue or PyFalse based on the length of self.
+
+    Note: Because floating point values have slight amounts of error in them, allow a 10^-10 margin of error
 */
 
-    if (_vectorLength(self) == 1)
+    if (fabs(_vectorLength(self) - 1) < .00000000001)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
 }
@@ -229,8 +231,10 @@ PyObject *vectorAdd(PyObject *a, PyObject *b) {
     Outputs: A new vector constructed by performing a + b, or an Exception.
 */
 
-    if ((!_assertVector(a)) || (!_assertVector(b)))
-        return NULL;
+    if (!(Vector_Check(a) && Vector_Check(b))) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
 
     return (PyObject *)_vectorAdd((Vector *)a, (Vector *)b);
 }
@@ -246,8 +250,10 @@ PyObject *vectorSub(PyObject *a, PyObject *b) {
     Outputs: A new vector constructed by performing a - b, or an Exception.
 */
 
-    if ((!_assertVector(a)) || (!_assertVector(b)))
-        return NULL;
+    if (!(Vector_Check(a) && Vector_Check(b))) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
 
     return (PyObject *)_vectorSub((Vector *)a, (Vector *)b);
 }
@@ -276,8 +282,8 @@ PyObject *vectorMul(PyObject *a, PyObject *b) {
         multiplier = PyFloat_AsDouble(b);
         v = (Vector *)a;
     } else {
-        PyErr_SetString(PyExc_TypeError, "Vector can only be multiplied by a scalar.");
-        return NULL;
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
     }
 
     if (PyErr_Occurred() != NULL)
@@ -306,8 +312,8 @@ PyObject *vectorDiv(PyObject *a, PyObject *b) {
         PyErr_SetString(PyExc_TypeError, "A vector cannot be used to divide an object.");
         return NULL;
     } else if (!PyNumber_Check(b)) {
-        PyErr_SetString(PyExc_TypeError, "Vector can only be divided by a scalar.");
-        return NULL;
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
     }
 
     divider = PyFloat_AsDouble(b);
@@ -315,7 +321,7 @@ PyObject *vectorDiv(PyObject *a, PyObject *b) {
     if (PyErr_Occurred() != NULL)
         return NULL;
 
-    return (PyObject *)_vectorMul((Vector *)a, divider);
+    return (PyObject *)_vectorDiv((Vector *)a, divider);
 }
 
 

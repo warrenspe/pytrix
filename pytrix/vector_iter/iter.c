@@ -32,6 +32,9 @@ PyObject *VectorIter_next(VectorIter *self) {
     if (self->i < iterating->dimensions)
         return PyFloat_FromDouble(Vector_GetValue(iterating, ((self->i)++)));
 
+    // Now that we're done iterating over this object we can remove our reference to it.
+    Py_DECREF(self->iterating);
+    self->iterating = NULL;
     PyErr_SetNone(PyExc_StopIteration);
     return NULL;
 }
@@ -49,6 +52,8 @@ void VectorIter_dealloc(VectorIter *self) {
 /*  Deallocates a VectorIterator. */
 
     PyObject_GC_UnTrack(self);
+
+    // If we didn't finish iterating over the object, we will still have to remove our reference to it
     Py_XDECREF(self->iterating);
     PyObject_GC_Del(self);
 }

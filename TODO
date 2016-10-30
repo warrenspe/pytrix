@@ -3,3 +3,5 @@ allow vector to be multiplied by matrix
 think about adding a linearComb function to do slightly faster linear combinations
 
 setup line intersection func
+
+update vector unit tests with tests including matrices

@@ -5,3 +5,7 @@ think about adding a linearComb function to do slightly faster linear combinatio
 setup line intersection func
 
 update vector unit tests with tests including matrices
+
+ensure we can past a list of vectors to matrix.init
+
+pyobject_del in deinits?

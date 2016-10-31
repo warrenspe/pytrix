@@ -15,21 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-PyObject *vectorIter(Vector *self) {
-/*  Creates an iterator over ourselves.
+// init.c
+static int matrixInit(Matrix *, PyObject *);
+static void matrixDeInit(Matrix *);
 
-    Inputs: self - The vector which will have an iterator constructed for it.
+// iter.c
+PyObject *matrixIter(Matrix *);
 
-    Outputs: The newly created VectorIter object.
-*/
+// operations.c
+PyObject *matrixStr(Matrix *);
 
-    VectorIter *i = PyObject_GC_New(VectorIter, &VectorIterType);
-    if (i == NULL)
-        return NULL;
+// utils.c
+Matrix *_matrixNew(unsigned int, unsigned int);
+Matrix *_matrixCopy(Matrix *);
+unsigned int _assertMatrix(PyObject *);
 
-    i->iterating = (PyObject *)self;
-    i->i = 0;
-    PyObject_GC_Track(i);
-    Py_INCREF(self);
-    return (PyObject *)i;
-}

@@ -15,21 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-PyObject *vectorIter(Vector *self) {
-/*  Creates an iterator over ourselves.
-
-    Inputs: self - The vector which will have an iterator constructed for it.
-
-    Outputs: The newly created VectorIter object.
-*/
-
-    VectorIter *i = PyObject_GC_New(VectorIter, &VectorIterType);
-    if (i == NULL)
-        return NULL;
-
-    i->iterating = (PyObject *)self;
-    i->i = 0;
-    PyObject_GC_Track(i);
-    Py_INCREF(self);
-    return (PyObject *)i;
-}
+// iter.c
+PyObject *MatrixIter_next(MatrixIter *);
+int MatrixIter_traverse(MatrixIter *, visitproc, void *);
+void MatrixIter_dealloc(MatrixIter *);

@@ -15,27 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Vector *_vectorNew(unsigned int);
-Vector *_vectorCopy(Vector *);
-unsigned int _assertVectorDimensionsEqual(Vector *, Vector *);
-unsigned int _assertVector(PyObject *);
-
-PyObject *_vectorToTuple(Vector *);
-VECTOR_TYPE _vectorDot(Vector *, Vector *);
-VECTOR_TYPE _vectorLength(Vector *);
-Vector *_vectorAdd(Vector *, Vector *);
-Vector *_vectorSub(Vector *, Vector *);
-Vector *_vectorMul(Vector *, VECTOR_TYPE);
-Vector *_vectorDiv(Vector *, VECTOR_TYPE);
-Vector *_vectorNeg(Vector *);
-unsigned char _vectorsEqual(Vector *, Vector *);
-
 Vector *_vectorNew(unsigned int dimensions) {
 /*  Creates a new vector objects with the given number of dimensions.
 
     Inputs: dimensions - The number of dimensions to create the new vector object with.
 
-    Outputs: A pointer to a Vector object.
+    Outputs: A pointer to a Vector object, or NULL if an error occurred..
 */
 
     Vector *newVector;
@@ -44,9 +29,7 @@ Vector *_vectorNew(unsigned int dimensions) {
     if ((data = PyMem_New(VECTOR_TYPE, dimensions)) == NULL)
         return NULL;
 
-    newVector = PyObject_New(Vector, &VectorType);
-
-    if (newVector == NULL) {
+    if ((newVector = PyObject_New(Vector, &VectorType)) == NULL) {
         PyMem_Free(data);
         return NULL;
     }
@@ -54,7 +37,7 @@ Vector *_vectorNew(unsigned int dimensions) {
     newVector->dimensions = dimensions;
     newVector->data = data;
 
-    return (Vector *)PyObject_Init((PyObject *)newVector, &VectorType);
+    return newVector;
 }
 
 

@@ -24,12 +24,6 @@ void initTypes(PyObject *module) {
  * Inputs: module - The module object we will attach the types to.
  */
 
-    VectorType.tp_methods = VectorMethods;
-    VectorType.tp_as_number = &VectorNumberMethods;
-    VectorType.tp_richcompare = vectorRichCmp;
-    VectorType.tp_repr = (reprfunc)vectorRepr;
-    MatrixType.tp_methods = MatrixMethods;
-
     if (PyType_Ready(&VectorType) < 0)
         return;
     if (PyType_Ready(&VectorIterType) < 0)

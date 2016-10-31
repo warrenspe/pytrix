@@ -15,35 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-PyObject *vectorRepr(Vector *);
-PyObject *vectorDot(Vector *, PyObject *);
-PyObject *vectorCross(Vector *, PyObject *);
-PyObject *vectorLength(Vector *);
-PyObject *vectorAngleBetween(Vector *, PyObject *);
-PyObject *vectorUnit(Vector *);
-PyObject *vectorIsUnit(Vector *);
-PyObject *vectorCopy(Vector *);
-PyObject *vectorAdd(PyObject *, PyObject *);
-PyObject *vectorSub(PyObject *, PyObject *);
-PyObject *vectorMul(PyObject *, PyObject *);
-PyObject *vectorDiv(PyObject *, PyObject *);
-PyObject *vectorNeg(Vector *);
-PyObject *vectorOrthogonal(Vector *, PyObject *);
-PyObject *vectorRichCmp(PyObject *, PyObject *, int);
-int vectorTrue(Vector *);
-
-PyObject *vectorRepr(Vector *self) {
-/*  Constructs a Python String representing a human readable version of this vector.
+PyObject *vectorStr(Vector *self) {
+/*  Constructs a human-readable Python String representing a human readable version of this vector.
 
     Inputs: self - The vector for which the human readable format will be produced.
 
     Outputs: A PyString containing the human readable form of the vector.
 */
 
-    char *cRepr;
     PyObject *tuple,
-             *tupleRepr,
-             *vectorRepr;
+             *tupleRepr;
 
     if ((tuple = _vectorToTuple(self)) == NULL)
         return NULL;
@@ -51,18 +32,7 @@ PyObject *vectorRepr(Vector *self) {
     tupleRepr = PyObject_Repr(tuple);
     Py_DECREF(tuple);
 
-    if (tupleRepr == NULL)
-        return NULL;
-
-    if ((cRepr = PyBytes_AsString(tupleRepr)) == NULL) {
-        Py_DECREF(tupleRepr);
-        return NULL;
-    }
-
-    vectorRepr = PyBytes_FromFormat("<Vector %s>", cRepr);
-    Py_DECREF(tupleRepr);
-
-    return vectorRepr;
+    return tupleRepr;
 }
 
 

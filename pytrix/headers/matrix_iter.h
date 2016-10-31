@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "vector_iter/iter.c"
+#include "matrix_iter/iter.c"
 
-static PyTypeObject VectorIterType = {
+static PyTypeObject MatrixIterType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "VectorIter",
-    sizeof(VectorIter),
+    "MatrixIter",
+    sizeof(MatrixIter),
     0,                         /*tp_itemsize*/
-    (destructor)VectorIter_dealloc,                         /*tp_dealloc*/
+    (destructor)MatrixIter_dealloc,                         /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -38,13 +38,13 @@ static PyTypeObject VectorIterType = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,        /*tp_flags*/
-    "Internal Vector Iterator object.", /* tp_doc */
-    (traverseproc)VectorIter_traverse,                         /* tp_traverse */
+    "Internal Matrix Iterator object.", /* tp_doc */
+    (traverseproc)MatrixIter_traverse,                         /* tp_traverse */
     0,                         /* tp_clear */
     0,                         /* tp_richcompare */
     0,                         /* tp_weaklistoffset */
     PyObject_SelfIter,         /* tp_iter */
-    (iternextfunc)VectorIter_next,                         /* tp_iternext */
+    (iternextfunc)MatrixIter_next,                         /* tp_iternext */
     0,                         /* tp_methods */
     0,                         /* tp_members */
     0,                         /* tp_getset */

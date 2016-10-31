@@ -23,6 +23,7 @@
 
 // Matrix Macros
 #define Matrix_Check(op) (Py_TYPE(op) == &MatrixType)
-#define Matrix_Index(matrix, row, col) ((matrix->width) * row + col)
-#define Matrix_GetValue(matrix, row, col) (*((matrix->data) + Matrix_Index(matrix, row, col)))
-#define Matrix_SetValue(matrix, row, col, val) Matrix_GetValue(matrix, row, col) = val
+#define Matrix_GetVector(matrix, row) (*(matrix->data + row))
+#define Matrix_SetVector(matrix, row, vector) (*(matrix->data + row)) = vector
+#define Matrix_GetValue(matrix, row, col) (Vector_GetValue(Matrix_GetVector(row), col))
+#define Matrix_SetValue(matrix, row, col, val) (Vector_SetValue(Matrix_GetVector(row), col, val))

@@ -16,9 +16,6 @@
  */
 
 
-static int vectorInit(Vector *, PyObject *);
-static void vectorDeInit(Vector *);
-
 static int vectorInit(Vector *self, PyObject *args) {
 /*  Initializes a vector from a sequence.
 
@@ -43,9 +40,7 @@ static int vectorInit(Vector *self, PyObject *args) {
         vectorDeInit(self);
 
     self->dimensions = PySequence_Fast_GET_SIZE(iterable);
-    self->data = PyMem_New(VECTOR_TYPE, self->dimensions);
-
-    if (self->data == NULL)
+    if ((self->data = PyMem_New(VECTOR_TYPE, self->dimensions)) == NULL)
         return -1;
 
     // Initialize self->data from the given iterable
@@ -53,9 +48,10 @@ static int vectorInit(Vector *self, PyObject *args) {
         item = PyNumber_Float(PySequence_Fast_GET_ITEM(iterable, i));
         if (item == NULL) {
             PyErr_Format(PyExc_TypeError, "Non-numeric object in iterable slot %d", i);
+            vectorDeInit(self);
             return -1;
         }
-        *(self->data + i) = PyFloat_AsDouble(item);
+        *(self->data + i) = PyFloat_AS_DOUBLE(item);
     }
 
     return 0;

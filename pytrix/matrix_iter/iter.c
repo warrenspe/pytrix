@@ -15,18 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-PyObject *VectorIter_next(VectorIter *self) {
-/*  Returns the current value pointed to by the given iterator and increments the internal counter.
+PyObject *MatrixIter_next(MatrixIter *self) {
+/*  Returns the current row pointed to by the given iterator and increments the internal counter.
 
-    Inputs: self - The VectorIter to iterate.
+    Inputs: self - The MatrixIter to iterate.
 
-    Outputs: A PyFloat containing the next value pointed to by the iterator.
+    Outputs: A PyObject * containing the next vector pointed to by the iterator.
 */
 
-    Vector *iterating = (Vector *)self->iterating;
+    Matrix *iterating = (Matrix *)self->iterating;
+    Vector *next;
 
-    if (self->i < iterating->dimensions)
-        return PyFloat_FromDouble(Vector_GetValue(iterating, ((self->i)++)));
+    if (self->i < iterating->rows) {
+        next = Matrix_GetVector(iterating, ((self->i)++));
+        return (PyObject *)_vectorCopy(next);
+    }
 
     // Now that we're done iterating over this object we can remove our reference to it.
     Py_DECREF(self->iterating);
@@ -36,7 +39,7 @@ PyObject *VectorIter_next(VectorIter *self) {
 }
 
 
-int VectorIter_traverse(VectorIter *self, visitproc visit, void *arg) {
+int MatrixIter_traverse(MatrixIter *self, visitproc visit, void *arg) {
 /*  Function used by pythons garbage collector to determine cyclic references between objects. */
 
     Py_VISIT(self->iterating);
@@ -44,8 +47,8 @@ int VectorIter_traverse(VectorIter *self, visitproc visit, void *arg) {
 }
 
 
-void VectorIter_dealloc(VectorIter *self) {
-/*  Deallocates a VectorIterator. */
+void MatrixIter_dealloc(MatrixIter *self) {
+/*  Deallocates a MatrixIterator. */
 
     PyObject_GC_UnTrack(self);
 

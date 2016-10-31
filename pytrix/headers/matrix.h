@@ -15,14 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "matrix/init.c"
-
 static PyMemberDef MatrixMembers[] = {
-    {"height", T_UINT, offsetof(Matrix, height), READONLY, "Height of the matrix."},
-    {"width", T_UINT, offsetof(Matrix, width), READONLY, "Width of the matrix."},
+    {"rows", T_UINT, offsetof(Matrix, rows), READONLY, "Number of rows in the matrix."},
+    {"columns", T_UINT, offsetof(Matrix, columns), READONLY, "Number of columns in the matrix."},
     {NULL} // Sentinel
 };
 
+// Matrix Functions
+#if PY_MAJOR_VERSION >= 3
+static PyNumberMethods MatrixNumberMethods = {
+    (binaryfunc)matrixAdd,
+    (binaryfunc)matrixSub,
+    (binaryfunc)matrixMul,
+    0,
+    0,
+    0,
+    (unaryfunc)matrixNeg,
+    0,
+    0,
+    (inquiry)matrixTrue,
+};
+#else
+/*static PyNumberMethods MatrixNumberMethods = {
+    (binaryfunc)matrixAdd,
+    (binaryfunc)matrixSub,
+    (binaryfunc)matrixMul,
+    (binaryfunc)matrixDiv,
+    0,
+    0,
+    0,
+    (unaryfunc)matrixNeg,
+    0,
+    0,
+    (inquiry)matrixTrue,
+};*/
+#endif
+static PyMethodDef MatrixMethods[] = {
+    {NULL}  /* Sentinel */
+};
+
+
+/* NOTES:
+    * Matrices are immutable; when operations are performed on them new matrices are created.
+*/
 static PyTypeObject MatrixType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "pytrix.Matrix",
@@ -34,24 +69,24 @@ static PyTypeObject MatrixType = {
     0,                         /*tp_setattr*/
     0,                         /*tp_compare*/
     0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence TODO?*/
+    0,//&MatrixNumberMethods,                         /*tp_as_number*/ // TODO
+    0,                         /*tp_as_sequence*/
     0,                         /*tp_as_mapping*/
     0,                         /*tp_hash */
     0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro TODO?*/
-    0,                         /*tp_setattro TODO?*/
+    (reprfunc)matrixStr,                         /*tp_str*/
+    0,                         /*tp_getattro*/
+    0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES,        /*tp_flags*/
     "Object representing a Matrix.",
     0,                     /* tp_traverse */
     0,                     /* tp_clear */
-    0,                     /* tp_richcompare */
+    0,//matrixRichCmp,                     /* tp_richcompare */ // TODO
     0,                     /* tp_weaklistoffset */
-    0,                     /* tp_iter */
+    (getiterfunc)matrixIter,                     /* tp_iter */
     0,                     /* tp_iternext */
-    0,             /* tp_methods */
+    MatrixMethods,             /* tp_methods */
     MatrixMembers,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */

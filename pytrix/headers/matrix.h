@@ -36,11 +36,11 @@ static PyNumberMethods MatrixNumberMethods = {
     (inquiry)matrixTrue,
 };
 #else
-/*static PyNumberMethods MatrixNumberMethods = {
+static PyNumberMethods MatrixNumberMethods = {
     (binaryfunc)matrixAdd,
     (binaryfunc)matrixSub,
     (binaryfunc)matrixMul,
-    (binaryfunc)matrixDiv,
+    0,
     0,
     0,
     0,
@@ -48,7 +48,7 @@ static PyNumberMethods MatrixNumberMethods = {
     0,
     0,
     (inquiry)matrixTrue,
-};*/
+};
 #endif
 static PyMethodDef MatrixMethods[] = {
     {NULL}  /* Sentinel */
@@ -69,7 +69,7 @@ static PyTypeObject MatrixType = {
     0,                         /*tp_setattr*/
     0,                         /*tp_compare*/
     0,                         /*tp_repr*/
-    0,//&MatrixNumberMethods,                         /*tp_as_number*/ // TODO
+    &MatrixNumberMethods,                         /*tp_as_number*/
     0,                         /*tp_as_sequence*/
     0,                         /*tp_as_mapping*/
     0,                         /*tp_hash */
@@ -82,7 +82,7 @@ static PyTypeObject MatrixType = {
     "Object representing a Matrix.",
     0,                     /* tp_traverse */
     0,                     /* tp_clear */
-    0,//matrixRichCmp,                     /* tp_richcompare */ // TODO
+    matrixRichCmp,                     /* tp_richcompare */
     0,                     /* tp_weaklistoffset */
     (getiterfunc)matrixIter,                     /* tp_iter */
     0,                     /* tp_iternext */

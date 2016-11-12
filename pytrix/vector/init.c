@@ -32,12 +32,17 @@ static int vectorInit(Vector *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "O", &iterable))
         return -1;
 
+    // Assert that we got an iterable
+    if (!Compatible_Input_Sequence_Check(iterable)) {
+        PyErr_SetString(PyExc_TypeError, "Non-sequence type passed.");
+        return -1;
+    }
     if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL)
         return -1;
 
     // If we have already been initialized, free the memory reserved in our data variable before it is reinitialized
     if (self->data != NULL)
-        vectorDeInit(self);
+        PyMem_Free(self->data);
 
     self->dimensions = PySequence_Fast_GET_SIZE(iterable);
     if ((self->data = PyMem_New(VECTOR_TYPE, self->dimensions)) == NULL)
@@ -45,13 +50,12 @@ static int vectorInit(Vector *self, PyObject *args) {
 
     // Initialize self->data from the given iterable
     for (i = 0; i < self->dimensions; i++) {
-        item = PyNumber_Float(PySequence_Fast_GET_ITEM(iterable, i));
-        if (item == NULL) {
+        item = PySequence_Fast_GET_ITEM(iterable, i);
+        if (!PyNumber_Check(item)) {
             PyErr_Format(PyExc_TypeError, "Non-numeric object in iterable slot %d", i);
-            vectorDeInit(self);
             return -1;
         }
-        *(self->data + i) = PyFloat_AS_DOUBLE(item);
+        Vector_SetValue(self, i, PyNumber_AS_VECTOR_TYPE(item));
     }
 
     return 0;
@@ -62,4 +66,5 @@ static void vectorDeInit(Vector *self) {
     /* De-allocates a vector. */
 
     PyMem_Free(self->data);
+    PyObject_Del(self);
 }

@@ -112,7 +112,7 @@ PyObject *_vectorToTuple(Vector *self) {
         return NULL;
 
     for (i = 0; i < self->dimensions; i++) {
-        item = PyFloat_FromDouble(Vector_GetValue(self, i));
+        item = PyNumber_FROM_VECTOR_TYPE(Vector_GetValue(self, i));
 
         if (item == NULL) {
             Py_DECREF(tuple);
@@ -168,7 +168,7 @@ Vector *_vectorAdd(Vector *a, Vector *b) {
     Inputs: a - The first vector to add.
             b - The second vector to add.
 
-    Outputs: A new third vector constructed by performing a + b.
+    Outputs: A new third vector constructed by performing a + b, or NULL if an error occurred.
 */
 
     Vector *sum;
@@ -193,7 +193,7 @@ Vector *_vectorSub(Vector *a, Vector *b) {
     Inputs: a - The first vector to subtract from.
             b - The second vector to use to subtract from a.
 
-    Outputs: A new third vector constructed by performing a - b.
+    Outputs: A new third vector constructed by performing a - b, or NULL if an error occurred.
 */
 
     Vector *difference;
@@ -218,7 +218,7 @@ Vector *_vectorMul(Vector *self, VECTOR_TYPE multiplier) {
     Inputs: self       - The vector to be multiplied by multiplier.
             multiplier - The scalar to multiply self by.
 
-    Outputs: A new Vector object constructed by performing self * multiplier.
+    Outputs: A new Vector object constructed by performing self * multiplier, or NULL if an error occurred.
 */
 
     Vector *product;

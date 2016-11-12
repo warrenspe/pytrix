@@ -19,6 +19,7 @@
 #define __PYTRIX_H 1
 
     #define VECTOR_TYPE double
+    #define STRASSEN_CUTOFF 1000
 
     // Standard Library Includes
     #include <Python.h>
@@ -63,6 +64,7 @@
     #include "headers/macros.h"
 
     // Function Definition Includes
+    #include "utils.c"
     #include "headers/vector_functions.h"
     #include "headers/vector_iter_functions.h"
     #include "headers/matrix_functions.h"
@@ -83,6 +85,7 @@
     // Matrix Function Includes
     #include "matrix/init.c"
     #include "matrix/iter.c"
+    #include "matrix/strassen.c"
     #include "matrix/utils.c"
     #include "matrix/operations.c"
 

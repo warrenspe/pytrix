@@ -16,17 +16,35 @@
  */
 
 // init.c
-static int matrixInit(Matrix *, PyObject *);
-static void matrixDeInit(Matrix *);
+static void _freeMatrixData(Matrix *);
+int matrixInit(Matrix *, PyObject *);
+void matrixDeInit(Matrix *);
 
 // iter.c
 PyObject *matrixIter(Matrix *);
 
 // operations.c
 PyObject *matrixStr(Matrix *);
+PyObject *matrixAdd(PyObject *, PyObject *);
+PyObject *matrixSub(PyObject *, PyObject *);
+PyObject *matrixMul(PyObject *, PyObject *);
+PyObject *matrixNeg(PyObject *);
+int matrixTrue(Matrix *);
+PyObject *matrixRichCmp(PyObject *, PyObject *, int);
 
 // utils.c
+Matrix *_matrixNewBlank(unsigned int, unsigned int);
 Matrix *_matrixNew(unsigned int, unsigned int);
 Matrix *_matrixCopy(Matrix *);
 unsigned int _assertMatrix(PyObject *);
+unsigned int _assertMatrixDimensionsEqual(Matrix *, Matrix *);
+Matrix *_matrixAdd(Matrix *, Matrix *);
+Matrix *_matrixSub(Matrix *, Matrix *);
+Matrix *_scalarMatrixMul(Matrix *, VECTOR_TYPE);
+Vector *_vectorMatrixMul(PyObject *, PyObject *);
+Matrix *_matrixMatrixMul(Matrix *, Matrix *);
+Matrix *_matrixNeg(Matrix *);
+unsigned char _matricesEqual(Matrix *, Matrix *);
 
+// strassen.c
+Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);

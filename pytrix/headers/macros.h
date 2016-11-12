@@ -24,6 +24,9 @@
 // Matrix Macros
 #define Matrix_Check(op) (Py_TYPE(op) == &MatrixType)
 #define Matrix_GetVector(matrix, row) (*(matrix->data + row))
-#define Matrix_SetVector(matrix, row, vector) (*(matrix->data + row)) = vector
-#define Matrix_GetValue(matrix, row, col) (Vector_GetValue(Matrix_GetVector(row), col))
-#define Matrix_SetValue(matrix, row, col, val) (Vector_SetValue(Matrix_GetVector(row), col, val))
+#define Matrix_SetVector(matrix, row, vector) Matrix_GetVector(matrix, row) = vector
+#define Matrix_GetValue(matrix, row, col) (Vector_GetValue(Matrix_GetVector(matrix, row), col))
+#define Matrix_SetValue(matrix, row, col, val) (Vector_SetValue(Matrix_GetVector(matrix, row), col, val))
+
+// Other Macros
+#define Compatible_Input_Sequence_Check(op) PyList_CheckExact(op) || PyTuple_CheckExact(op)

@@ -9,3 +9,11 @@ update vector unit tests with tests including matrices
 ensure we can past a list of vectors to matrix.init
 
 pyobject_del in deinits?
+
+use struct Vectors in matrices, not pyobjects
+
+move static function prototypes to top of .c file
+
+m&v __getitem__
+
+seven dimensional cross prod

@@ -51,7 +51,7 @@ PyObject *vectorDot(Vector *self, PyObject *other) {
 
     VECTOR_TYPE product = _vectorDot(self, (Vector *)other);
     if (PyErr_Occurred() == NULL)
-        return PyFloat_FromDouble(product);
+        return PyNumber_FROM_VECTOR_TYPE(product);
 
     return NULL;
 }
@@ -107,7 +107,7 @@ PyObject *vectorLength(Vector *self) {
     Outputs: A PyFloat containing the length of the object, or an Exception.
 */
 
-    return PyFloat_FromDouble(_vectorLength(self));
+    return PyNumber_FROM_VECTOR_TYPE(_vectorLength(self));
 }
 
 
@@ -132,7 +132,7 @@ PyObject *vectorAngleBetween(Vector *self, PyObject *other) {
     otherLength = _vectorLength((Vector *)other);
     selfLength = _vectorLength(self);
 
-    return PyFloat_FromDouble(acos((dotProd / (selfLength * otherLength))));
+    return PyNumber_FROM_VECTOR_TYPE(acos((dotProd / (selfLength * otherLength))));
 }
 
 
@@ -193,12 +193,12 @@ PyObject *vectorCopy(Vector *self) {
 
 PyObject *vectorAdd(PyObject *a, PyObject *b) {
 /*  Adds the components of two vectors together to create a new third vector.
-    Note that both arguments must be sanitized, as any python object may be passed.
+    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
 
     Inputs: a - Supposedly the first vector to add.
             b - Supposedly the second vector to add.
 
-    Outputs: A new vector constructed by performing a + b, or an Exception.
+    Outputs: A new vector constructed by performing a + b, or NULL if an exception occurred.
 */
 
     if (!(Vector_Check(a) && Vector_Check(b))) {
@@ -212,12 +212,12 @@ PyObject *vectorAdd(PyObject *a, PyObject *b) {
 
 PyObject *vectorSub(PyObject *a, PyObject *b) {
 /*  Subtracts the components of two vectors to create a new third vector.
-    Note that both arguments must be sanitized, as any python object may be passed.
+    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
 
     Inputs: a - Supposedly the first vector to subtract from.
             b - Supposedly the second vector to use to subtract from a.
 
-    Outputs: A new vector constructed by performing a - b, or an Exception.
+    Outputs: A new vector constructed by performing a - b, or NULL if an exception occurred.
 */
 
     if (!(Vector_Check(a) && Vector_Check(b))) {
@@ -230,15 +230,16 @@ PyObject *vectorSub(PyObject *a, PyObject *b) {
 
 
 PyObject *vectorMul(PyObject *a, PyObject *b) {
-/*  Multiplies each of the components of a vector by a scalar to create a new vector.
-    Note that both arguments must be sanitized, as any python object may be passed.
+/*  Multiplies each of the components of a vector by a scalar or a matrix to create a new vector.
+    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
     We expect one of a or b to be a Vector object, and the other object to be a python object implementing the
-    numerical protocol.  They can come in either order.
+    numerical protocol, or a Matrix.  They can come in either order if it is a scalar, if we're multiplying with a
+    matrix, the first argument will be the vector and the second the matrix.
 
     Inputs: a - Supposedly either the vector to multiply by b, or the scalar to multiply b with.
             b - Supposedly either the vector to multiply by a, or the scalar to multiply a with.
 
-    Outputs: A new vector constructed by performing a * b, or an Exception.
+    Outputs: A new vector constructed by performing a * b, or NULL if an exception occurred.
 */
 
     Vector *v;
@@ -246,11 +247,14 @@ PyObject *vectorMul(PyObject *a, PyObject *b) {
 
     // Assert that the non vector argument is a number
     if (PyNumber_Check(a)) {
-        multiplier = PyFloat_AsDouble(a);
+        multiplier = PyNumber_AS_VECTOR_TYPE(a);
         v = (Vector *)b;
     } else if (PyNumber_Check(b)) {
-        multiplier = PyFloat_AsDouble(b);
+        multiplier = PyNumber_AS_VECTOR_TYPE(b);
         v = (Vector *)a;
+    } else if (Matrix_Check(b)) {
+        return (PyObject *)_vectorMatrixMul(a, b);
+
     } else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
@@ -265,14 +269,14 @@ PyObject *vectorMul(PyObject *a, PyObject *b) {
 
 PyObject *vectorDiv(PyObject *a, PyObject *b) {
 /*  Divides each of the components of a vector by a scalar to create a new vector.
-    Note that both arguments must be sanitized, as any python object may be passed.
+    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
     We expect a to be the vector object being divided, and the other object to be a python object implementing the
     numerical protocol.
 
     Inputs: a - Supposedly either the vector to divide by b.
             b - Supposedly the scalar to divide a by.
 
-    Outputs: A new vector constructed by performing a / b, or an Exception.
+    Outputs: A new vector constructed by performing a / b, or NULL if an exception occurred.
 */
 
     VECTOR_TYPE divider;
@@ -286,7 +290,7 @@ PyObject *vectorDiv(PyObject *a, PyObject *b) {
         return Py_NotImplemented;
     }
 
-    divider = PyFloat_AsDouble(b);
+    divider = PyNumber_AS_VECTOR_TYPE(b);
 
     if (PyErr_Occurred() != NULL)
         return NULL;
@@ -371,7 +375,7 @@ int vectorTrue(Vector *self) {
 
     Inputs: self - The vector to check.
 
-    Outputs: A PyTrue or PyFalse based on whether or not self is a 0 magnitude vector or not.
+    Outputs: 1 / 0 based on whether or not self is a 0 magnitude vector or not.
 */
 
     unsigned int i;

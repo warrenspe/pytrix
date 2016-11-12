@@ -16,6 +16,13 @@ class TestVector(tests.PytrixTestCase):
         self.v2 = pytrix.Vector([0, 9, 8, 7, 6, 5, 4, 3, 2, 1])
 
 
+    def testVectorInit(self):
+        self.assertRaises(TypeError, pytrix.Vector, None)
+        self.assertRaises(TypeError, pytrix.Vector, 1)
+        self.assertRaises(TypeError, pytrix.Vector, [[1, 2, 3]])
+        self.assertEqual(len(list(pytrix.Vector([1, 2, 3]))), 3)
+
+
     def testVectorAdd(self):
         # Test typical vector additions
         self.assertEqual(list(self.v1 + self.v2), [1, 11, 11, 11, 11, 11, 11, 11, 11, 1])

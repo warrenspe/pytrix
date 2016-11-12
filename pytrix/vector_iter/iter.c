@@ -26,7 +26,7 @@ PyObject *VectorIter_next(VectorIter *self) {
     Vector *iterating = (Vector *)self->iterating;
 
     if (self->i < iterating->dimensions)
-        return PyFloat_FromDouble(Vector_GetValue(iterating, ((self->i)++)));
+        return PyNumber_FROM_VECTOR_TYPE(Vector_GetValue(iterating, ((self->i)++)));
 
     // Now that we're done iterating over this object we can remove our reference to it.
     Py_DECREF(self->iterating);

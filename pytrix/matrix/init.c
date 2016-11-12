@@ -15,7 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-static int matrixInit(Matrix *self, PyObject *args) {
+static void _freeMatrixData(Matrix *self) {
+/*  Frees the data referenced by a matrix being de-initialized
+
+    Inputs: self - The matrix whose data should be freed.
+*/
+
+    unsigned int i;
+
+    if (self->data != NULL) {
+        for (i = 0; i < self->rows; i++)
+            Py_XDECREF(Matrix_GetVector(self, i));
+
+        PyMem_Free(self->data);
+    }
+}
+
+int matrixInit(Matrix *self, PyObject *args) {
 /*  Initializes a matrix from a sequence of either vectors or sequences.
 
     Inputs: self - The Matrix being initialized.
@@ -35,6 +51,10 @@ static int matrixInit(Matrix *self, PyObject *args) {
         return -1;
 
     // Assert that we got an iterable
+    if (!Compatible_Input_Sequence_Check(iterable)) {
+        PyErr_SetString(PyExc_TypeError, "Non-sequence type passed.");
+        return -1;
+    }
     if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL)
         return -1;
 
@@ -63,11 +83,11 @@ static int matrixInit(Matrix *self, PyObject *args) {
 
     // If we have already been initialized, free the memory reserved in our data variable before it is reinitialized
     if (self->data != NULL)
-        matrixDeInit(self);
+        _freeMatrixData(self);
 
-    if ((self->data = PyMem_Malloc(self->rows * sizeof(Vector *))) == NULL) {
+    if ((self->data = PyMem_Malloc(self->rows * sizeof(Vector *))) == NULL)
         return -1;
-    }
+
     memset(self->data, '\x00', sizeof(Vector *) * self->rows);
 
     // Initialize self->data from the given iterable
@@ -75,13 +95,12 @@ static int matrixInit(Matrix *self, PyObject *args) {
         rowSequence = PySequence_Fast_GET_ITEM(iterable, i);
         rowVector = _vectorNew(self->columns);
         for (j = 0; j < self->columns; j++) {
-            item = PyNumber_Float(PySequence_Fast_GET_ITEM(rowSequence, j));
-            if (item == NULL) {
+            item = PySequence_Fast_GET_ITEM(rowSequence, j);
+            if (!PyNumber_Check(item)) {
                 PyErr_Format(PyExc_TypeError, "Non-numeric object in row %d, column %d", i, j);
-                matrixDeInit(self);
                 return -1;
             }
-            Vector_SetValue(rowVector, j, PyFloat_AS_DOUBLE(item));
+            Vector_SetValue(rowVector, j, PyNumber_AS_VECTOR_TYPE(item));
         }
         Matrix_SetVector(self, i, rowVector);
     }
@@ -89,17 +108,10 @@ static int matrixInit(Matrix *self, PyObject *args) {
     return 0;
 }
 
-static void matrixDeInit(Matrix *self) {
+void matrixDeInit(Matrix *self) {
     /* De-allocates a matrix. */
 
-    unsigned int i;
-    Vector *row;
-
-    for (i = 0; i < self->rows; i++) {
-        if ((row = Matrix_GetVector(self, i)) != NULL)
-            vectorDeInit(row);
-    }
-
-    PyMem_Free(self->data);
+    _freeMatrixData(self);
+    PyObject_Del(self);
 }
 

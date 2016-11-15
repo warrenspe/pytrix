@@ -1,5 +1,4 @@
 /*
- *  pytrix.c: A module used to construct and interact with matrices & vectors.
  *  Copyright (C) 2016 Warren Spencer warrenspencer27@gmail.com
 
  *  This program is free software: you can redistribute it and/or modify

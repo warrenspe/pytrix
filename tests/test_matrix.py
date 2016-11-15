@@ -111,7 +111,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(self.zero3 * self.m1, self.zero3)
         self.assertNotEqual(self.m1 * self.m2, self.m2 * self.m1)
         self._assertMatrixEqual(self.m1 * self.m2, [30, 24, 18], [84, 69, 54], [138, 114, 90])
-
+        self.assertEqual(list(self.e1 * self.e1), [])
 
         # Test erroneous matrix multiplications
         self.assertRaises(TypeError, lambda *x: [] * self.m1)
@@ -119,51 +119,18 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(TypeError, lambda *x: self.m1 * "0")
         self.assertRaises(ValueError, lambda *x: self.m1 * self.zero2)
 
-    def _testVectorDiv(self):
-        # Test typical vector divisions
-        self.assertEqual(list(self.v1 / 2), [.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 0])
-        self.assertEqual(list(self.e1 / 5), [])
-        self.assertEqual(list(self.zero0 / 5), [0])
-
-        # Test erroneous vector divisions
-        self.assertRaises(TypeError, lambda *x: [] / self.v1)
-        self.assertRaises(TypeError, lambda *x: self.v1 / [])
-        self.assertRaises(TypeError, lambda *x: self.v1 / "0")
-        self.assertRaises(TypeError, lambda *x: self.v1 / self.v2)
-        self.assertRaises(TypeError, lambda *x: 5 / self.v1)
-        self.assertRaises(ZeroDivisionError, lambda *x: self.zero0 / 0)
-
-    def _testVectorNeg(self):
+    def testMatrixNeg(self):
         self.assertEqual(self.e1, -self.e1)
-        self.assertEqual(self.zero0, -self.zero0)
         self.assertEqual(self.zero1, -self.zero1)
         self.assertEqual(self.zero2, -self.zero2)
-        self.assertEqual(list(-self.v1), [-1, -2, -3, -4, -5, -6, -7, -8, -9, 0])
+        self.assertEqual(self.zero3, -self.zero3)
+        self._assertMatrixEqual(-self.m1, [-1, -2, -3], [-4, -5, -6], [-7, -8, -9])
 
 
-    def _testVectorTruth(self):
-        self.assertTrue(self.v1)
-        self.assertFalse(self.zero0)
+    def testMatrixTruth(self):
+        self.assertTrue(self.m1)
         self.assertFalse(self.zero1)
         self.assertFalse(self.zero2)
+        self.assertFalse(self.zero3)
         self.assertFalse(self.e1)
-
-    def _testVectorDimensions(self):
-        self.assertEqual(self.e1.dimensions, 0)
-        self.assertEqual(self.zero0.dimensions, 1)
-        self.assertEqual(self.zero1.dimensions, 2)
-        self.assertEqual(self.zero2.dimensions, 3)
-        self.assertEqual(self.v1.dimensions, 10)
-        self.assertEqual(self.v2.dimensions, 10)
-
-    def _testVectorCopy(self):
-        self.assertEqual(self.v1, self.v1.copy())
-        self.assertEqual(self.v2, self.v2.copy())
-        self.assertEqual(self.e1, self.e1.copy())
-        self.assertEqual(self.zero0, self.zero0.copy())
-        self.assertEqual(self.zero1, self.zero1.copy())
-        self.assertEqual(self.zero2, self.zero2.copy())
-        self.assertEqual(id(self.v1), id(self.v1))
-        self.assertNotEqual(id(self.v1), id(self.v1.copy()))
-
 

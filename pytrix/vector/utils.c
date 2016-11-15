@@ -60,7 +60,7 @@ Vector *_vectorCopy(Vector *v) {
 }
 
 
-unsigned int _assertVectorDimensionsEqual(Vector *a, Vector *b) {
+unsigned char _assertVectorDimensionsEqual(Vector *a, Vector *b) {
 /*  Asserts that two vectors are equal.  Sets a PyError if they are not.
 
     Inputs: a - A pointer to the first Vector.
@@ -78,7 +78,7 @@ unsigned int _assertVectorDimensionsEqual(Vector *a, Vector *b) {
 }
 
 
-unsigned int _assertVector(PyObject *toCheck) {
+unsigned char _assertVector(PyObject *toCheck) {
 /*  Asserts that the given PyObject is a Vector object.
 
     Inputs: toCheck - A PyObject to test if whether or not it is a Vector.

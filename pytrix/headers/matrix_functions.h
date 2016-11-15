@@ -25,26 +25,33 @@ PyObject *matrixIter(Matrix *);
 
 // operations.c
 PyObject *matrixStr(Matrix *);
+PyObject *matrixItem(PyObject *, Py_ssize_t);
 PyObject *matrixAdd(PyObject *, PyObject *);
 PyObject *matrixSub(PyObject *, PyObject *);
 PyObject *matrixMul(PyObject *, PyObject *);
 PyObject *matrixNeg(PyObject *);
 int matrixTrue(Matrix *);
 PyObject *matrixRichCmp(PyObject *, PyObject *, int);
+PyObject *matrixTranspose(PyObject *);
+PyObject *matrixSymmetrical(PyObject *);
+PyObject *matrixRow(PyObject *, PyObject *);
+PyObject *matrixColumn(PyObject *, PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);
 Matrix *_matrixNew(unsigned int, unsigned int);
 Matrix *_matrixCopy(Matrix *);
-unsigned int _assertMatrix(PyObject *);
-unsigned int _assertMatrixDimensionsEqual(Matrix *, Matrix *);
+unsigned char _assertMatrix(PyObject *);
+unsigned char _assertMatrixDimensionsEqual(Matrix *, Matrix *);
+unsigned char _matricesEqual(Matrix *, Matrix *);
 Matrix *_matrixAdd(Matrix *, Matrix *);
 Matrix *_matrixSub(Matrix *, Matrix *);
 Matrix *_scalarMatrixMul(Matrix *, VECTOR_TYPE);
 Vector *_vectorMatrixMul(PyObject *, PyObject *);
 Matrix *_matrixMatrixMul(Matrix *, Matrix *);
 Matrix *_matrixNeg(Matrix *);
-unsigned char _matricesEqual(Matrix *, Matrix *);
+Matrix *_matrixTranspose(Matrix *);
+unsigned char _matrixSymmetrical(Matrix *);
 
 // strassen.c
 Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);

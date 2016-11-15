@@ -22,6 +22,16 @@ class TestMatrix(tests.PytrixTestCase):
         for i, v in enumerate(matrix):
             self.assertEqual(list(v), lists[i])
 
+    def testMatrixRowsColumns(self):
+        self.assertEqual(self.e1.rows, 0)
+        self.assertEqual(self.e1.columns, 0)
+        self.assertEqual(self.zero1.rows, 1)
+        self.assertEqual(self.zero1.columns, 1)
+        self.assertEqual(self.zero2.rows, 2)
+        self.assertEqual(self.zero2.columns, 2)
+        self.assertEqual(self.m1.rows, 3)
+        self.assertEqual(self.m1.columns, 3)
+
     def testMatrixInit(self):
         self.assertRaises(TypeError, pytrix.Matrix, None)
         self.assertRaises(TypeError, pytrix.Matrix, [None])
@@ -134,3 +144,35 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertFalse(self.zero3)
         self.assertFalse(self.e1)
 
+    def testMatrixGetItem(self):
+        self.assertIsInstance(self.m1[0], pytrix.Vector)
+        self.assertEqual(list(self.m1[0]), [1, 2, 3])
+        self.assertEqual(list(self.m1[1]), [4, 5, 6])
+        self.assertEqual(list(self.m1[2]), [7, 8, 9])
+        self.assertEqual(self.m1[0][0], 1)
+        self.assertEqual(self.m1[2][2], 9)
+        self.assertRaises(IndexError, self.m1.__getitem__, 3)
+        self.assertRaises(IndexError, self.e1.__getitem__, 0)
+
+    def testMatrixTranspose(self):
+        self.assertEqual(self.m1, self.m1.transpose().transpose())
+        self._assertMatrixEqual(self.m1.transpose(), [1, 4, 7], [2, 5, 8], [3, 6, 9])
+        self.assertEqual(self.e1.transpose(), self.e1)
+
+    def testMatrixRow(self):
+        self.assertRaises(IndexError, self.e1.row, 0)
+        self.assertRaises(ValueError, self.m1.row, -1)
+        self.assertRaises(IndexError, self.m1.row, 10)
+        self.assertEqual(list(self.m1.row(0)), [1, 2, 3])
+        self.assertEqual(list(self.m1.row(1)), [4, 5, 6])
+        self.assertEqual(list(self.m1.row(2)), [7, 8, 9])
+        self.assertEqual(list(self.zero1.row(0)), [0])
+
+    def testMatrixColumn(self):
+        self.assertRaises(IndexError, self.e1.column, 0)
+        self.assertRaises(ValueError, self.m1.column, -1)
+        self.assertRaises(IndexError, self.m1.column, 10)
+        self.assertEqual(list(self.m1.column(0)), [1, 4, 7])
+        self.assertEqual(list(self.m1.column(1)), [2, 5, 8])
+        self.assertEqual(list(self.m1.column(2)), [3, 6, 9])
+        self.assertEqual(list(self.zero1.row(0)), [0])

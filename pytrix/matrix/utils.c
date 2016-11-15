@@ -94,7 +94,7 @@ Matrix *_matrixCopy(Matrix *m) {
 }
 
 
-unsigned int _assertMatrix(PyObject *toCheck) {
+unsigned char _assertMatrix(PyObject *toCheck) {
 /*  Asserts that the given PyObject is a Matrix object.
 
     Inputs: toCheck - A PyObject to test if whether or not it is a Matrix.
@@ -111,7 +111,7 @@ unsigned int _assertMatrix(PyObject *toCheck) {
 }
 
 
-unsigned int _assertMatrixDimensionsEqual(Matrix *a, Matrix *b) {
+unsigned char _assertMatrixDimensionsEqual(Matrix *a, Matrix *b) {
 /*  Asserts that two matrices dimensions are equal.  Sets a PyError if they are not.
 
     Inputs: a - A pointer to the first Matrix.
@@ -123,6 +123,24 @@ unsigned int _assertMatrixDimensionsEqual(Matrix *a, Matrix *b) {
     if (a->rows != b->rows || a->columns != b->columns) {
         PyErr_SetString(PyExc_ValueError, "Matrices must be of the same dimensions.");
         return 0;
+    }
+
+    return 1;
+}
+
+
+unsigned char _matricesEqual(Matrix *a, Matrix *b) {
+    unsigned int row,
+                 col;
+
+    if (a->rows != b->rows || a->columns != b->columns)
+        return 0;
+
+    for (row = 0; row < a->rows; row++) {
+        for (col = 0; col < a->columns; col++) {
+            if (Matrix_GetValue(a, row, col) != Matrix_GetValue(b, row, col))
+                return 0;
+        }
     }
 
     return 1;
@@ -354,17 +372,53 @@ Matrix *_matrixNeg(Matrix *a) {
 }
 
 
-unsigned char _matricesEqual(Matrix *a, Matrix *b) {
+Matrix *_matrixTranspose(Matrix *self) {
+/*  Creates and returns a new matrix constructed by taking the transpose of this matrix.
+
+    Inputs: self - The matrix being transposed.
+
+    Outputs: A new Matrix Object constructed by taking the transpose of self, or NULL if an error occurred.
+*/
+
+    Matrix *transposed;
     unsigned int row,
                  col;
 
-    if (a->rows != b->rows || a->columns != b->columns)
+    if ((transposed = _matrixNew(self->columns, self->rows)) == NULL)
+        return NULL;
+
+    for (row = 0; row < self->rows; row++) {
+        for (col = 0; col < self->columns; col++) {
+            Matrix_SetValue(transposed, col, row, Matrix_GetValue(self, row, col));
+        }
+    }
+
+    return transposed;
+}
+
+
+unsigned char _matrixSymmetrical(Matrix *self) {
+/*  Determines whether or not the given matrix is symmetric.
+
+    Inputs: self - The matrix to check for symmetry.
+
+    Outputs: 1 if the matrix is symmetric, else 0.
+*/
+
+    unsigned int row,
+                 col;
+
+    // Non-square matrices are automatically non-symmetrical
+    if (self->rows != self->columns)
         return 0;
 
-    for (row = 0; row < a->rows; row++) {
-        for (col = 0; col < a->columns; col++) {
-            if (Matrix_GetValue(a, row, col) != Matrix_GetValue(b, row, col))
-                return 0;
+    for (row = 0; row < self->rows; row++) {
+        for (col = 0; col < self->columns; col++) {
+            // Don't worry about values along the diagonal
+            if (row != col) {
+                if (Matrix_GetValue(self, row, col) != Matrix_GetValue(self, col, row))
+                    return 0;
+            }
         }
     }
 

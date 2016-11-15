@@ -14,6 +14,8 @@ use struct Vectors in matrices, not pyobjects
 
 move static function prototypes to top of .c file
 
-m&v __getitem__
-
 seven dimensional cross prod
+
+allow matrix initialization passing *args of iterables
+
+move all error messages of functions calling pynumber_as_long and pynumber_as_vector_type into those functions, use PyErr_Occurred in calling functions

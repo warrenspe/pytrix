@@ -50,7 +50,27 @@ static PyNumberMethods MatrixNumberMethods = {
     (inquiry)matrixTrue,
 };
 #endif
+
+static PySequenceMethods MatrixSequenceMethods = {
+    0,                                          /* sq_length */
+    0,                                          /* sq_concat */
+    0,                                          /* sq_repeat */
+    (ssizeargfunc)matrixItem,                   /* sq_item */
+    0,                                          /* sq_slice */
+    0,                                          /* sq_ass_item */
+    0,                                          /* sq_ass_slice */
+    0,                                          /* sq_contains */
+};
+
 static PyMethodDef MatrixMethods[] = {
+    {"row", (PyCFunction)matrixRow, METH_O,
+        PyDoc_STR("Returns the ith row of this Matrix as a Vector.")},
+    {"column", (PyCFunction)matrixColumn, METH_O,
+        PyDoc_STR("Returns the ith column of this Matrix as a Vector.")},
+    {"transpose", (PyCFunction)matrixTranspose, METH_NOARGS,
+        PyDoc_STR("Constructs a new matrix object, from the transpose of this matrix.")},
+    {"symmetrical", (PyCFunction)matrixSymmetrical, METH_NOARGS,
+        PyDoc_STR("Determines whether or not this matrix is symmetrical.")},
     {NULL}  /* Sentinel */
 };
 
@@ -70,7 +90,7 @@ static PyTypeObject MatrixType = {
     0,                         /*tp_compare*/
     0,                         /*tp_repr*/
     &MatrixNumberMethods,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
+    &MatrixSequenceMethods,                         /*tp_as_sequence*/
     0,                         /*tp_as_mapping*/
     0,                         /*tp_hash */
     0,                         /*tp_call*/

@@ -95,6 +95,31 @@ PyObject *matrixAdd(PyObject *a, PyObject *b) {
 }
 
 
+PyObject *matrixItem(PyObject *self, Py_ssize_t i) {
+/*  Returns the ith row of the matrix.
+
+    Inputs: self - The Matrix which the row should be pulled from.
+            i    - The row in the ith position of self will be returned.
+
+    Outputs: A PyObject containing the vector in the ith slot of self.
+*/
+
+    Matrix *m = (Matrix *)self;
+    Vector *v;
+    unsigned int idx = (unsigned int)i;
+
+    if (idx >= m->rows) {
+        PyErr_Format(PyExc_IndexError, "Cannot return row number %x of Matrix with %x rows.", idx, m->rows);
+        return NULL;
+    }
+
+    if ((v = _vectorCopy(Matrix_GetVector(m, idx))) == NULL)
+        return NULL;
+
+    return (PyObject *)v;
+}
+
+
 PyObject *matrixSub(PyObject *a, PyObject *b) {
 /*  Subtracts the components of two matrices to create a new matrix.
     Note that both arguments must be sanitized, as any Python object may be passed in either slot.
@@ -220,4 +245,91 @@ PyObject *matrixRichCmp(PyObject *a, PyObject *b, int op) {
             Py_INCREF(Py_NotImplemented);
             return Py_NotImplemented;
     }
+}
+
+
+PyObject *matrixTranspose(PyObject *self) {
+/*  Creates and returns a new matrix constructed by taking the transpose of this matrix.
+
+    Inputs: self - The matrix being transposed.
+
+    Outputs: A new Matrix Object constructed by taking the transpose of self.
+*/
+
+    return (PyObject *)_matrixTranspose((Matrix *)self);
+}
+
+
+PyObject *matrixSymmetrical(PyObject *self) {
+/*  Determines whether or not self is symmetrical.
+
+    Inputs: self - The Matrix to determine whether or not is symmetrical.
+
+    Outputs: A PyTrue or PyFalse depending on whether or not self is symmetrical.
+*/
+
+    if (_matrixSymmetrical((Matrix *)self))
+        Py_RETURN_TRUE;
+
+    Py_RETURN_FALSE;
+}
+
+
+PyObject *matrixRow(PyObject *self, PyObject *idx) {
+/*  Returns the ith row from the Matrix self.
+
+    Inputs: self - The matrix to return the ith row from.
+            idx  - The row number to return from self.
+
+    Outputs: A Vector object of the ith row in self if successful, NULL if an error occurs.
+*/
+
+    unsigned long i = PyNumber_AS_UNSIGNED_LONG(idx);
+    Matrix *m = (Matrix *)self;
+    Vector *v;
+
+    if (PyErr_Occurred())
+        return NULL;
+
+    if (i >= m->rows) {
+        PyErr_Format(PyExc_IndexError, "Cannot return row number %lu of Matrix with %x rows.", i, m->rows);
+        return NULL;
+    }
+
+    if ((v = _vectorCopy(Matrix_GetVector(m, i))) == NULL)
+        return NULL;
+
+    return (PyObject *)v;
+}
+
+
+PyObject *matrixColumn(PyObject *self, PyObject *idx) {
+/*  Returns the ith column from the Matrix self.
+
+    Inputs: self - The matrix to return the ith column from.
+            idx  - The column number to return from self.
+
+    Outputs: A Vector object of the ith column in self if successful, NULL if an error occurs.
+*/
+
+    unsigned long col = PyNumber_AS_UNSIGNED_LONG(idx),
+                  i;
+    Matrix *m = (Matrix *)self;
+    Vector *v;
+
+    if (PyErr_Occurred())
+        return NULL;
+
+    if (col >= m->columns) {
+        PyErr_Format(PyExc_IndexError, "Cannot return column number %lu of Matrix with %x columns.", col, m->columns);
+        return NULL;
+    }
+
+    if ((v = _vectorNew(m->rows)) == NULL)
+        return NULL;
+
+    for (i = 0; i < v->dimensions; i++)
+        Vector_SetValue(v, i, Matrix_GetValue(m, i, col));
+
+    return (PyObject *)v;
 }

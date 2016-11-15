@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+VECTOR_TYPE PyNumber_AS_VECTOR_TYPE(PyObject *);
+long PyNumber_AS_UNSIGNED_LONG(PyObject *);
+PyObject *PyNumber_FROM_VECTOR_TYPE(VECTOR_TYPE);
+
+
 VECTOR_TYPE PyNumber_AS_VECTOR_TYPE(PyObject *n) {
 /*  Converts a PyObject containing any type of number to a VECTOR_TYPE.
 
@@ -23,8 +28,47 @@ VECTOR_TYPE PyNumber_AS_VECTOR_TYPE(PyObject *n) {
     Outputs: A VECTOR_TYPE.
 */
 
-    return PyFloat_AS_DOUBLE(PyNumber_Float(n));
+    PyObject *pyFloat;
+    VECTOR_TYPE retval;
+
+    pyFloat = PyNumber_Float(n);
+    retval = PyFloat_AS_DOUBLE(pyFloat);
+    Py_DECREF(pyFloat);
+
+    return retval;
 }
+
+
+long PyNumber_AS_UNSIGNED_LONG(PyObject *n) {
+/*  Converts a PyObject containing any type of number to a long.
+
+    Inputs: n - The PyObject to convert.
+
+    Outputs: A long.
+*/
+
+    PyObject *pyLong;
+    long retval;
+
+    if (!PyNumber_Check(n)) {
+        PyErr_Format(PyExc_TypeError, "Given object is not a number: \"%.400s\"", Py_TYPE(n)->tp_name);
+        return 0;
+    }
+
+    if ((pyLong = PyNumber_Long(n)) == NULL)
+        return 0;
+
+    retval = PyLong_AsLong(pyLong);
+    Py_DECREF(pyLong);
+
+    if (retval < 0) {
+        PyErr_Format(PyExc_ValueError, "Index cannot be less than 0: %l", retval);
+        return 0;
+    }
+
+    return (unsigned long)retval;
+}
+
 
 PyObject *PyNumber_FROM_VECTOR_TYPE(VECTOR_TYPE v) {
 /*  Converts a VECTOR_TYPE to a PyObject.

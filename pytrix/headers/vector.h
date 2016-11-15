@@ -50,6 +50,17 @@ static PyNumberMethods VectorNumberMethods = {
 };
 #endif
 
+static PySequenceMethods VectorSequenceMethods = {
+    0,                                          /* sq_length */
+    0,                                          /* sq_concat */
+    0,                                          /* sq_repeat */
+    (ssizeargfunc)vectorItem,                   /* sq_item */
+    0,                                          /* sq_slice */
+    0,                                          /* sq_ass_item */
+    0,                                          /* sq_ass_slice */
+    0,                                          /* sq_contains */
+};
+
 static PyMethodDef VectorMethods[] = {
     {"copy", (PyCFunction)vectorCopy, METH_NOARGS,
         PyDoc_STR("Creates a copy of this vector.")},
@@ -86,7 +97,7 @@ static PyTypeObject VectorType = {
     0,                         /*tp_compare*/
     0,                         /*tp_repr*/
     &VectorNumberMethods,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
+    &VectorSequenceMethods,                         /*tp_as_sequence*/
     0,                         /*tp_as_mapping*/
     0,                         /*tp_hash */
     0,                         /*tp_call*/

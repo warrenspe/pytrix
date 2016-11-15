@@ -63,8 +63,10 @@
     #include "headers/py2_3compat.h"
     #include "headers/macros.h"
 
-    // Function Definition Includes
+    // Utilities
     #include "utils.c"
+
+    // Function Definition Includes
     #include "headers/vector_functions.h"
     #include "headers/vector_iter_functions.h"
     #include "headers/matrix_functions.h"

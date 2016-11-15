@@ -36,12 +36,13 @@ PyObject *vectorNeg(Vector *);
 PyObject *vectorOrthogonal(Vector *, PyObject *);
 PyObject *vectorRichCmp(PyObject *, PyObject *, int);
 int vectorTrue(Vector *);
+PyObject *vectorItem(PyObject *, Py_ssize_t);
 
 // utils.c
 Vector *_vectorNew(unsigned int);
 Vector *_vectorCopy(Vector *);
-unsigned int _assertVectorDimensionsEqual(Vector *, Vector *);
-unsigned int _assertVector(PyObject *);
+unsigned char _assertVectorDimensionsEqual(Vector *, Vector *);
+unsigned char _assertVector(PyObject *);
 
 PyObject *_vectorToTuple(Vector *);
 VECTOR_TYPE _vectorDot(Vector *, Vector *);

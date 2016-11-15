@@ -232,3 +232,12 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, v1.orthogonal, 1)
         self.assertRaises(TypeError, v1.orthogonal, [])
         self.assertRaises(TypeError, v1.orthogonal, "")
+
+    def testVectorGetItem(self):
+        self.assertEqual(self.v1[0], 1)
+        self.assertEqual(self.v1[1], 2)
+        self.assertEqual(self.v1[2], 3)
+        self.assertEqual(self.v1[3], 4)
+        self.assertEqual(self.v1[4], 5)
+        self.assertEqual(self.v1[5], 6)
+        self.assertRaises(IndexError, self.v1.__getitem__, 11)

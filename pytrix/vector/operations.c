@@ -387,3 +387,24 @@ int vectorTrue(Vector *self) {
 
     return 0;
 }
+
+
+PyObject *vectorItem(PyObject *self, Py_ssize_t i) {
+/*  Returns the ith item in the vector.
+
+    Inputs: self - The Vector which the item should be pulled from.
+            i    - The item in the ith dimension of self will be returned.
+
+    Outputs: A PyObject containing the value of the item in the ith slot of self.
+*/
+
+    Vector *v = (Vector *)self;
+    unsigned int idx = (unsigned int)i;
+
+    if (idx >= v->dimensions) {
+        PyErr_Format(PyExc_IndexError, "Cannot return item in index %x of Vector with %x dimensions.", idx, v->dimensions);
+        return NULL;
+    }
+
+    return PyNumber_FROM_VECTOR_TYPE(Vector_GetValue(v, idx));
+}

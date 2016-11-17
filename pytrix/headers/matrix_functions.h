@@ -36,11 +36,14 @@ PyObject *matrixTranspose(PyObject *);
 PyObject *matrixSymmetrical(PyObject *);
 PyObject *matrixRow(PyObject *, PyObject *);
 PyObject *matrixColumn(PyObject *, PyObject *);
+PyObject *matrixGuassianElim(PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);
 Matrix *_matrixNew(unsigned int, unsigned int);
+void _matrixCopyData(Matrix *, Matrix *);
 Matrix *_matrixCopy(Matrix *);
+unsigned char _matrixInitIdentity(Matrix *);
 unsigned char _assertMatrix(PyObject *);
 unsigned char _assertMatrixDimensionsEqual(Matrix *, Matrix *);
 unsigned char _matricesEqual(Matrix *, Matrix *);
@@ -52,6 +55,7 @@ Matrix *_matrixMatrixMul(Matrix *, Matrix *);
 Matrix *_matrixNeg(Matrix *);
 Matrix *_matrixTranspose(Matrix *);
 unsigned char _matrixSymmetrical(Matrix *);
+unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *);
 
 // strassen.c
 Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);

@@ -333,3 +333,33 @@ PyObject *matrixColumn(PyObject *self, PyObject *idx) {
 
     return (PyObject *)v;
 }
+
+
+PyObject *matrixGuassianElim(PyObject *self) {
+/*  Uses Guassian elimination to convert the given matrix into an upper triangular matrix.
+
+    Inputs: self - The matrix to perform guassian elimination.
+
+    Outputs: A new Matrix containing the elimination of self.
+*/
+
+    Matrix *upperTriangular;
+    Matrix *m = (Matrix *)self;
+
+    if ((upperTriangular = _matrixNew(m->rows, m->columns)) == NULL)
+        return NULL;
+
+    if (!_matrixPALDU(NULL, m, NULL, NULL, upperTriangular)) {
+        Py_DECREF(upperTriangular);
+        return NULL;
+    }
+
+    return (PyObject *)upperTriangular;
+}
+
+
+PyObject *matrixInvertible(PyObject *self) {
+
+
+    // call PALDU passing just U, check if all diagonal are non-zero
+}

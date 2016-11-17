@@ -71,6 +71,8 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Constructs a new matrix object, from the transpose of this matrix.")},
     {"symmetrical", (PyCFunction)matrixSymmetrical, METH_NOARGS,
         PyDoc_STR("Determines whether or not this matrix is symmetrical.")},
+    {"guassianElim", (PyCFunction)matrixGuassianElim, METH_NOARGS,
+        PyDoc_STR("Performs Guassian elimination on this matrix to convert it into upper triangular form.")},
     {NULL}  /* Sentinel */
 };
 

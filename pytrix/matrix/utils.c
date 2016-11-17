@@ -73,6 +73,20 @@ Matrix *_matrixNew(unsigned int rows, unsigned int columns) {
 }
 
 
+void _matrixCopyData(Matrix *in, Matrix *out) {
+/*  Copies the contents from one matrix to another.  Does no error checking.
+
+    Inputs: in  - The matrix to copy the data from.
+            out - The matrix to copy the data to.
+*/
+
+    unsigned int i;
+
+    for (i = 0; i < in->rows; i++)
+        memcpy(Matrix_GetVector(out, i)->data, Matrix_GetVector(in, i)->data, sizeof(VECTOR_TYPE) * in->columns);
+}
+
+
 Matrix *_matrixCopy(Matrix *m) {
 /*  Creates a new copy of the given matrix.
 
@@ -81,16 +95,41 @@ Matrix *_matrixCopy(Matrix *m) {
     Outputs: A Matrix object with the same number of rows/columns and data as m, or NULL if an exception occurred.
 */
 
-    unsigned int i;
     Matrix *copy = _matrixNew(m->rows, m->columns);
 
     if (copy == NULL)
         return NULL;
 
-    for (i = 0; i < m->rows; i++)
-        memcpy(Matrix_GetVector(copy, i)->data, Matrix_GetVector(m, i)->data, sizeof(VECTOR_TYPE) * m->columns);
+    _matrixCopyData(m, copy);
 
     return copy;
+}
+
+
+unsigned char _matrixInitIdentity(Matrix *m) {
+/*  Initializes a matrix so that it is an identity matrix.  Requires that m be a square matrix.
+
+    Inputs: m - The matrix to initialize to an identity matrix.
+
+    Outputs: 1 if successful, 0 if an error occurred.
+*/
+
+    unsigned int row;
+
+    // Assert that the matrix is square
+    if (m->rows != m->columns) {
+        PyErr_SetString(PyExc_ValueError, "Cannot initialize non-square matrix as identity.");
+        return 0;
+    }
+
+    for (row = 0; row < m->rows; row++) {
+        // Clear the row
+        memset(Matrix_GetVector(m, row)->data, '\x00', sizeof(VECTOR_TYPE) * m->columns);
+        // Set this rows 1 entry
+        Matrix_SetValue(m, row, row, 1);
+    }
+
+    return 1;
 }
 
 
@@ -420,6 +459,135 @@ unsigned char _matrixSymmetrical(Matrix *self) {
                     return 0;
             }
         }
+    }
+
+    return 1;
+}
+
+
+unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u) {
+/*  Calculates the (P^-1)A=LDU decomposition for the given Matrix a.
+    Notes:
+        * All parameters other than a, and u are optional.  If passed, they should be a pointer to an empty Matrix
+          object. If not passed, they will not be computed.
+        * p is the inverse of a matrix constructed from the permutations applied to u during decomposition.
+        * l is a unit lower-triangular matrix constructed from the row operations applied to u during decomposition.
+        * d is a diagonal matrix constructed from the pivots of L
+            if d is passed, l must also be passed.
+        * u is a unit upper-triangular matrix constructed from the remains of a after decomposition.
+
+    Inputs: a       - The matrix to perform the decomposition on.
+            p, l, d - Either NULL pointers or pointers to Matrix objects to be populated.
+            u       - A pointer to the reduced row-echelon form of a.
+
+    Outputs: 1 if successful, 0 if an error occurred.
+*/
+
+    unsigned int col,
+                 row = 0,
+                 rowIter,
+                 colIter;
+    VECTOR_TYPE multiplier,
+                pivot;
+    Vector *tempRow;
+
+    // Ensure that all the matrices given have the same dimensions as a.
+    if (u == NULL || !_assertMatrixDimensionsEqual(a, u))
+        return 0;
+    if (l != NULL) {
+        if (l->columns != l->rows) {
+            PyErr_SetString(PyExc_ValueError, "Lower matrix argument to PALDU must be square.");
+            return 0;
+        }
+        if (l->columns != a->rows) {
+            PyErr_SetString(PyExc_ValueError, "Lower matrix argument to PALDU's columns must equal input matrix's rows.");
+            return 0;
+        }
+        if (!_matrixInitIdentity(l))
+            return 0;
+    }
+    if (d != NULL) {
+        if (l == NULL) {
+            PyErr_SetString(PyExc_ValueError, "D argument must be accompanied by a L argument to PALDU.");
+            return 0;
+        }
+        if (!_assertMatrixDimensionsEqual(l, d))
+            return 0;
+        if (!_matrixInitIdentity(d))
+            return 0;
+    }
+    if (p != NULL) {
+        if (p->columns != p->rows) {
+            PyErr_SetString(PyExc_ValueError, "Permutation matrix argument to PALDU must be square.");
+            return 0;
+        }
+        if (a->rows != p->columns) {
+            PyErr_SetString(PyExc_ValueError, "Permutation matrix argument to PALDU's columns must equal input matrix's rows.");
+            return 0;
+        }
+    }
+
+    // Copy the data from a into u; which we will act upon to convert it into an upper trianguler and in the
+    // process populate any other matrices we need to.
+    _matrixCopyData(a, u);
+
+    // Process each column of the matrix in turn
+    for (col = 0; col < u->columns && row < u->rows - 1; col++) {
+        // If the pivot in the current row and column is a 0, we either require a permutation or all rows below us to
+        // also have 0 for this column.
+        if (Matrix_GetValue(u, row, col) == 0) {
+            for (rowIter = row + 1; rowIter < u->rows; rowIter++) {
+                // If we've found a row to permute with
+                if (Matrix_GetValue(u, rowIter, col) != 0) {
+                    // Update p
+                    if (p != NULL) {
+                        tempRow = Matrix_GetVector(p, row);
+                        Matrix_SetVector(p, row, Matrix_GetVector(p, rowIter));
+                        Matrix_SetVector(p, rowIter, tempRow);
+                    }
+
+                    // Permute the rows
+                    tempRow = Matrix_GetVector(u, row);
+                    Matrix_SetVector(u, row, Matrix_GetVector(u, rowIter));
+                    Matrix_SetVector(u, rowIter, tempRow);
+                    break;
+                }
+            }
+
+            // If we're here and rowIter == u->rows, all rows below us are 0.  Move on to the next column
+            if (rowIter == u->rows)
+                continue;
+        }
+
+        pivot = Matrix_GetValue(u, row, col);
+
+        // We have found a pivot.  For each row below us, if the value is non-zero, eliminate it
+        for (rowIter = row + 1; rowIter < u->rows; rowIter++) {
+            if (Matrix_GetValue(u, rowIter, col) != 0) {
+                // Eliminate this row
+                multiplier = Matrix_GetValue(u, rowIter, col) / pivot;
+                Matrix_SetValue(u, rowIter, col, 0);
+                for (colIter = col + 1; colIter < u->columns; colIter++) {
+                    Matrix_SetValue(u, rowIter, colIter,
+                        Matrix_GetValue(u, rowIter, colIter) - (multiplier * Matrix_GetValue(u, row, colIter)));
+                }
+
+                // Update l from this elimination
+                if (l != NULL)
+                    Matrix_SetValue(l, rowIter, row, multiplier);
+            }
+        }
+
+        // Record the pivot in d if passed
+        if (d != NULL)
+            Matrix_SetValue(d, row, col, pivot);
+
+        // Reduce this row now that we're done with it
+        for (colIter = col; colIter < u->columns; colIter++)
+            Matrix_SetValue(u, row, colIter, Matrix_GetValue(u, row, colIter) / pivot);
+
+        // We're done with this row
+        row++;
     }
 
     return 1;

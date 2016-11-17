@@ -62,7 +62,7 @@ long PyNumber_AS_UNSIGNED_LONG(PyObject *n) {
     Py_DECREF(pyLong);
 
     if (retval < 0) {
-        PyErr_Format(PyExc_ValueError, "Index cannot be less than 0: %l", retval);
+        PyErr_Format(PyExc_ValueError, "Index cannot be less than 0: %ld", retval);
         return 0;
     }
 

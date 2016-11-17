@@ -176,3 +176,6 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(list(self.m1.column(1)), [2, 5, 8])
         self.assertEqual(list(self.m1.column(2)), [3, 6, 9])
         self.assertEqual(list(self.zero1.row(0)), [0])
+
+    def testMatrixGuassianElim(self):
+        # TODO

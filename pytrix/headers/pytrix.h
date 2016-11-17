@@ -87,9 +87,9 @@
     // Matrix Function Includes
     #include "matrix/init.c"
     #include "matrix/iter.c"
-    #include "matrix/strassen.c"
     #include "matrix/utils.c"
     #include "matrix/operations.c"
+    #include "matrix/strassen.c"
 
     // Declarations for DLL import/export
     #ifndef PyMODINIT_FUNC

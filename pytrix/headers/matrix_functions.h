@@ -36,7 +36,7 @@ PyObject *matrixTranspose(PyObject *);
 PyObject *matrixSymmetrical(PyObject *);
 PyObject *matrixRow(PyObject *, PyObject *);
 PyObject *matrixColumn(PyObject *, PyObject *);
-PyObject *matrixGuassianElim(PyObject *);
+PyObject *matrixGaussianElim(PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);

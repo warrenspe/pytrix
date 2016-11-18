@@ -532,7 +532,7 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
     _matrixCopyData(a, u);
 
     // Process each column of the matrix in turn
-    for (col = 0; col < u->columns && row < u->rows - 1; col++) {
+    for (col = 0; col < u->columns && row < u->rows; col++) {
         // If the pivot in the current row and column is a 0, we either require a permutation or all rows below us to
         // also have 0 for this column.
         if (Matrix_GetValue(u, row, col) == 0) {

@@ -17,10 +17,12 @@ class TestVector(tests.PytrixTestCase):
 
 
     def testVectorInit(self):
+        self.assertRaises(TypeError, pytrix.Vector)
         self.assertRaises(TypeError, pytrix.Vector, None)
-        self.assertRaises(TypeError, pytrix.Vector, 1)
+        self.assertRaises(TypeError, pytrix.Vector, '1')
         self.assertRaises(TypeError, pytrix.Vector, [[1, 2, 3]])
         self.assertEqual(len(list(pytrix.Vector([1, 2, 3]))), 3)
+        self.assertEqual(list(pytrix.Vector(1, 2, 3, 4, 5, 6)), [1, 2, 3, 4, 5, 6])
 
 
     def testVectorAdd(self):

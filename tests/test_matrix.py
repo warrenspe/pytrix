@@ -17,8 +17,9 @@ class TestMatrix(tests.PytrixTestCase):
 
 
     def _assertMatrixEqual(self, matrix, *lists):
-        self.assertEqual(matrix.columns, len(lists))
-        self.assertEqual(matrix.rows, len(lists[0]))
+        self.assertEqual(matrix.rows, len(lists))
+        if len(lists):
+            self.assertEqual(matrix.columns, len(lists[0]))
         for i, v in enumerate(matrix):
             self.assertEqual(list(v), lists[i])
 
@@ -37,11 +38,23 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(TypeError, pytrix.Matrix, [None])
         self.assertRaises(TypeError, pytrix.Matrix, [[1, 2], None])
         self.assertRaises(TypeError, pytrix.Matrix, 1)
-        self.assertRaises(TypeError, pytrix.Matrix, [1])
         self.assertRaises(TypeError, pytrix.Matrix, "abc")
         self.assertRaises(TypeError, pytrix.Matrix, [[1, 2], [1]])
         self.assertEqual(pytrix.Matrix([[1, 2], [3, 4], [5, 6]]).rows, 3)
         self.assertEqual(pytrix.Matrix([[1, 2, 3], [4, 5, 6]]).columns, 3)
+        self.assertEqual(pytrix.Matrix([]).columns, 0)
+        self.assertEqual(pytrix.Matrix([]).rows, 0)
+        self._assertMatrixEqual(pytrix.Matrix([1]), [1])
+        self._assertMatrixEqual(pytrix.Matrix([1, 2], [3, 4], [5, 6]), [1, 2], [3, 4], [5, 6])
+        self._assertMatrixEqual(pytrix.Matrix([[1, 2], [3, 4], [5, 6]]), [1, 2], [3, 4], [5, 6])
+        self._assertMatrixEqual(pytrix.Matrix([1, 2, 3]), [1, 2, 3])
+        self._assertMatrixEqual(pytrix.Matrix([[1, 2, 3]]), [1, 2, 3])
+        self.assertRaises(TypeError, pytrix.Matrix, [], [])
+        self.assertRaises(TypeError, pytrix.Matrix, [[], []])
+        self.assertRaises(TypeError, pytrix.Matrix, [[[]]])
+        self.assertRaises(TypeError, pytrix.Matrix, 1, 2, 3)
+        self.assertRaises(TypeError, pytrix.Matrix, [[1, 2, 3]], [])
+        self.assertRaises(TypeError, pytrix.Matrix, [1, 2, 3], [[1, 2, 3]])
 
     def testMatrixAdd(self):
         # Test typical matrix additions
@@ -177,5 +190,80 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(list(self.m1.column(2)), [3, 6, 9])
         self.assertEqual(list(self.zero1.row(0)), [0])
 
-    def testMatrixGuassianElim(self):
-        # TODO
+    def testMatrixGaussianElim(self):
+        self._assertMatrixEqual(pytrix.Matrix(
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ).gaussianElim(),
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [1, 0, 0, 1],
+                [0, 1, 0, 1],
+                [0, 0, 1, 1],
+            ).gaussianElim(),
+                [1, 0, 0, 1],
+                [0, 1, 0, 1],
+                [0, 0, 1, 1],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [1, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 1, 0],
+            ).gaussianElim(),
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 0],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [1, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 1, 0],
+            ).gaussianElim(),
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 0],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [1, 2, 3, 5],
+                [0, 1, 4, 6],
+                [0, 0, 1, 7],
+            ).gaussianElim(),
+                [1, 2, 3, 5],
+                [0, 1, 4, 6],
+                [0, 0, 1, 7],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [2, 2, 4, 6],
+                [0, 3, 6, 9],
+                [0, 0, 4, 8],
+            ).gaussianElim(),
+                [1, 1, 2, 3],
+                [0, 1, 2, 3],
+                [0, 0, 1, 2],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [2, 2, 4, 6],
+                [4, 4, 8,12],
+                [6, 6,12,18],
+            ).gaussianElim(),
+                [1, 1, 2, 3],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+        )
+        self._assertMatrixEqual(pytrix.Matrix(
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [1, 0, 1, 0],
+            ).gaussianElim(),
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 0],
+        )
+        self.assertRaises(ValueError, self.e1.gaussianElim)
+        self.assertRaises(ValueError, self.zero1.gaussianElim)
+        self.assertRaises(ValueError, self.zero2.gaussianElim)
+        self.assertRaises(ValueError, self.m1.gaussianElim)

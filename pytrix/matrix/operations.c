@@ -335,16 +335,21 @@ PyObject *matrixColumn(PyObject *self, PyObject *idx) {
 }
 
 
-PyObject *matrixGuassianElim(PyObject *self) {
-/*  Uses Guassian elimination to convert the given matrix into an upper triangular matrix.
+PyObject *matrixGaussianElim(PyObject *self) {
+/*  Uses Gaussian elimination to convert the given matrix into an upper triangular matrix.
 
-    Inputs: self - The matrix to perform guassian elimination.
+    Inputs: self - The matrix to perform gaussian elimination.
 
     Outputs: A new Matrix containing the elimination of self.
 */
 
     Matrix *upperTriangular;
     Matrix *m = (Matrix *)self;
+
+    if (m->columns != m->rows + 1) {
+        PyErr_SetString(PyExc_ValueError, "Gaussian Elimination must be performed on a Matrix with columns = rows + 1.");
+        return NULL;
+    }
 
     if ((upperTriangular = _matrixNew(m->rows, m->columns)) == NULL)
         return NULL;

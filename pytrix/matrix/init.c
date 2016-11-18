@@ -35,7 +35,7 @@ int matrixInit(Matrix *self, PyObject *args) {
 /*  Initializes a matrix from a sequence of either vectors or sequences.
 
     Inputs: self - The Matrix being initialized.
-            args - A packed versoin of the arguments passed to the initializer.
+            args - A packed version of the arguments passed to the initializer.
 
     Outputs: 0 If successful, else -1
 */
@@ -47,17 +47,61 @@ int matrixInit(Matrix *self, PyObject *args) {
              *item = NULL;
     Vector *rowVector;
 
-    if (!PyArg_ParseTuple(args, "O", &iterable))
-        return -1;
 
-    // Assert that we got an iterable
-    if (!Compatible_Input_Sequence_Check(iterable)) {
-        PyErr_SetString(PyExc_TypeError, "Non-sequence type passed.");
+    // We expect either args to contain either a single iterable of iterables, or a series of iterables.
+    // Assert that args isn't empty
+    if (PySequence_Length(args) == 0) {
+        PyErr_SetString(PyExc_TypeError,
+                        "No input rows passed to Matrix.__init__. See help(Matrix) for more information.");
         return -1;
     }
-    if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL)
-        return -1;
 
+    if ((iterable = PySequence_GetItem(args, 0)) == NULL)
+        return -1;
+    if (!Compatible_Input_Sequence_Check(iterable)) {
+        PyErr_SetString(PyExc_TypeError, "First argument to Matrix.__init__ is not an iterables.");
+        return -1;
+    }
+
+    // If iterable is empty
+    if (PySequence_Length(iterable) == 0) {
+        // Assert that we were only given a single argument.  One empty iterable argument implies empty matrix.
+        // Multiple empty iterable arguments is undefined.
+        if (PySequence_Length(args) != 1) {
+            PyErr_SetString(PyExc_TypeError, "Passing more than one empty row to Matrix.__init__ is not allowed.");
+            return -1;
+        }
+
+    // Otherwise iterable isn't empty.  Check if it contains iterables.
+    } else {
+        if ((item = PySequence_GetItem(iterable, 0)) == NULL)
+            return -1;
+
+        // Ensure that we were given an iterable
+        if (Compatible_Input_Sequence_Check(item)) {
+            // If iterable contains iterables, then we have a [[...], [...]] scenario.  Ensure that there were no other
+            // arguments to Matrix.__init__
+            if (PySequence_Length(args) != 1) {
+                PyErr_SetString(PyExc_TypeError, "2d iterable passed with other arguments. Behavior is undefined.");
+                return -1;
+            }
+
+            // If the length of the inner iterable is empty, ensure it is the only iterable in our iterable list
+            // In other words, ([[], []]) is undefined for the same reasons that ([], []) is
+            if (PySequence_Length(item) == 0 && PySequence_Length(iterable) != 1) {
+                PyErr_SetString(PyExc_TypeError, "Passing more than one empty row to Matrix.__init__ is not allowed.");
+                return -1;
+            }
+
+        // Otherwise our iterable doesn't contain iterables.  So, to get the [[...], [...]] structure required below
+        // we will set iterable to args.  As args is an iterable containing iterables.
+        } else {
+            iterable = args;
+        }
+    }
+
+
+    // Parse iterable, perform validation, and parse it into our matrix.
     self->rows = PySequence_Fast_GET_SIZE(iterable);
     self->columns = 0;
 
@@ -65,7 +109,7 @@ int matrixInit(Matrix *self, PyObject *args) {
     if (self->rows != 0) {
         for (i = 0; i < self->rows; i++) {
             item = PySequence_Fast_GET_ITEM(iterable, i);
-            if (!PySequence_Check(item)) {
+            if (!Compatible_Input_Sequence_Check(item)) {
                 PyErr_Format(PyExc_TypeError, "Non-sequence in iterable slot %d", i);
                 return -1;
             }

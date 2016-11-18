@@ -29,16 +29,29 @@ static int vectorInit(Vector *self, PyObject *args) {
     PyObject *iterable = NULL,
              *item = NULL;
 
-    if (!PyArg_ParseTuple(args, "O", &iterable))
-        return -1;
-
-    // Assert that we got an iterable
-    if (!Compatible_Input_Sequence_Check(iterable)) {
-        PyErr_SetString(PyExc_TypeError, "Non-sequence type passed.");
+    // We expect either args to contain either a single list of values, or a series of values.
+    // Assert that args isn't empty
+    if (PySequence_Length(args) == 0) {
+        PyErr_SetString(PyExc_TypeError,
+                        "Vector.__init__ takes either an iterable of values or an unpacked sequence of values.");
         return -1;
     }
-    if ((iterable = PySequence_Fast(iterable, "Non-sequence type passed.")) == NULL)
+
+    // Check the first value of args.  If it's an iterable, assert that args contains exactly one item
+    if ((item = PySequence_GetItem(args, 0)) == NULL)
         return -1;
+    if (Compatible_Input_Sequence_Check(item)) {
+        if (PySequence_Length(args) != 1) {
+            PyErr_SetString(PyExc_TypeError,
+                            "Vector.__init__ takes either an iterable of values or an unpacked sequence of values.");
+            return -1;
+        }
+        iterable = item;
+
+    // Otherwise, assume that we were given an unpacked sequence of values to initialize from
+    } else {
+        iterable = args;
+    }
 
     // If we have already been initialized, free the memory reserved in our data variable before it is reinitialized
     if (self->data != NULL)

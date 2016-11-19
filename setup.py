@@ -6,7 +6,7 @@ VERSION = "0.0.1"
 NAME = "pytrix"
 
 if "DEBUG" in os.environ:
-    DEBUG_COMPILE_ARGS = ['-O0', '-g', '-pedantic', '-Wall', '-Wextra', '-Wmissing-prototypes',
+    DEBUG_COMPILE_ARGS = ['-O0', '-g', '-g3', '-pedantic', '-Wall', '-Wextra', '-Wmissing-prototypes',
                           '-Wstrict-prototypes', '-Wold-style-definition']
 
 

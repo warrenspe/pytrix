@@ -78,7 +78,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: self.zero2 + self.e1)
         self.assertRaises(TypeError, lambda *x: self.m1 + pytrix.Vector([1, 2, 3]))
 
-    def testVectorSub(self):
+    def testMatrixSub(self):
         # Test typical matrix subtractions
         self._assertMatrixEqual(self.m1 - self.m2, [-8, -6, -4], [-2, 0, 2], [4, 6, 8])
         self._assertMatrixEqual(self.m2 - self.m1, [8, 6, 4], [2, 0, -2], [-4, -6, -8])
@@ -99,7 +99,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: self.m1 - self.e1)
         self.assertRaises(ValueError, lambda *x: self.zero1 - self.e1)
 
-    def testVectorMul(self):
+    def testMatrixMul(self):
         # Test scalar matrix multiplications
         self.assertEqual(self.m1, self.m1 * 1)
         self.assertEqual(self.m1, 1 * self.m1)
@@ -267,3 +267,17 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, self.zero1.gaussianElim)
         self.assertRaises(ValueError, self.zero2.gaussianElim)
         self.assertRaises(ValueError, self.m1.gaussianElim)
+
+    def testMatrixPermute(self):
+        self.assertRaises(ValueError, self.e1.permute, 0, 0)
+        self.assertRaises(ValueError, self.m1.permute, -1, 2)
+        self.assertRaises(ValueError, self.m1.permute, -1, 5)
+        self.assertRaises(ValueError, self.m1.permute, 0, 5)
+        self.assertRaises(TypeError, self.m1.permute, 0, 5.5)
+        self.assertRaises(TypeError, self.m1.permute, 0, "5")
+        self.assertRaises(TypeError, self.m1.permute, 0, [])
+
+        self.assertEqual(self.zero1, self.zero1.permute(0, 0))
+        self.assertEqual(self.m1, self.m1.permute(0, 0))
+        self.assertEqual(self.m1, self.m2.transpose().permute(0, 2).transpose().permute(0, 2))
+        self._assertMatrixEqual(self.m1.permute(0, 2), [7, 8, 9], [4, 5, 6], [1, 2, 3])

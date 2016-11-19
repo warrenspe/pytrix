@@ -68,11 +68,13 @@ static PyMethodDef MatrixMethods[] = {
     {"column", (PyCFunction)matrixColumn, METH_O,
         PyDoc_STR("Returns the ith column of this Matrix as a Vector.")},
     {"transpose", (PyCFunction)matrixTranspose, METH_NOARGS,
-        PyDoc_STR("Constructs a new matrix object, from the transpose of this matrix.")},
+        PyDoc_STR("Constructs a new Matrix object, from the transpose of this Matrix.")},
+    {"permute", (PyCFunction)matrixPermute, METH_VARARGS,
+        PyDoc_STR("Constructs a new Matrix from the permutation of two rows of this Matrix.")},
     {"symmetrical", (PyCFunction)matrixSymmetrical, METH_NOARGS,
-        PyDoc_STR("Determines whether or not this matrix is symmetrical.")},
+        PyDoc_STR("Determines whether or not this Matrix is symmetrical.")},
     {"gaussianElim", (PyCFunction)matrixGaussianElim, METH_NOARGS,
-        PyDoc_STR("Performs Gaussian elimination on this matrix to convert it into upper triangular form.")},
+        PyDoc_STR("Performs Gaussian elimination on this Matrix to convert it into upper triangular form.")},
     {NULL}  /* Sentinel */
 };
 

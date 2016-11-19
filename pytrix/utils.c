@@ -16,7 +16,7 @@
  */
 
 VECTOR_TYPE PyNumber_AS_VECTOR_TYPE(PyObject *);
-long PyNumber_AS_UNSIGNED_LONG(PyObject *);
+unsigned long PyNumber_AS_UNSIGNED_LONG(PyObject *);
 PyObject *PyNumber_FROM_VECTOR_TYPE(VECTOR_TYPE);
 
 
@@ -39,12 +39,12 @@ VECTOR_TYPE PyNumber_AS_VECTOR_TYPE(PyObject *n) {
 }
 
 
-long PyNumber_AS_UNSIGNED_LONG(PyObject *n) {
+unsigned long PyNumber_AS_UNSIGNED_LONG(PyObject *n) {
 /*  Converts a PyObject containing any type of number to a long.
 
     Inputs: n - The PyObject to convert.
 
-    Outputs: A long.
+    Outputs: A long.  Calling functions should check PyErr_Occurred afterwards.
 */
 
     PyObject *pyLong;
@@ -58,8 +58,12 @@ long PyNumber_AS_UNSIGNED_LONG(PyObject *n) {
     if ((pyLong = PyNumber_Long(n)) == NULL)
         return 0;
 
+    PyErr_Clear();
     retval = PyLong_AsLong(pyLong);
     Py_DECREF(pyLong);
+
+    if (PyErr_Occurred())
+        return 0;
 
     if (retval < 0) {
         PyErr_Format(PyExc_ValueError, "Index cannot be less than 0: %ld", retval);

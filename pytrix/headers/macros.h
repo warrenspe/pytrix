@@ -29,4 +29,4 @@
 #define Matrix_SetValue(matrix, row, col, val) (Vector_SetValue(Matrix_GetVector(matrix, row), col, val))
 
 // Other Macros
-#define Compatible_Input_Sequence_Check(op) PyList_CheckExact(op) || PyTuple_CheckExact(op)
+#define Compatible_Input_Sequence_Check(op) (PyList_CheckExact(op) || PyTuple_CheckExact(op))

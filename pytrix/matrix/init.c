@@ -59,7 +59,7 @@ int matrixInit(Matrix *self, PyObject *args) {
     if ((iterable = PySequence_GetItem(args, 0)) == NULL)
         return -1;
     if (!Compatible_Input_Sequence_Check(iterable)) {
-        PyErr_SetString(PyExc_TypeError, "First argument to Matrix.__init__ is not an iterables.");
+        PyErr_SetString(PyExc_TypeError, "First argument to Matrix.__init__ is not an iterable.");
         return -1;
     }
 

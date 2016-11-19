@@ -335,6 +335,34 @@ PyObject *matrixColumn(PyObject *self, PyObject *idx) {
 }
 
 
+PyObject *matrixPermute(PyObject *self, PyObject *args) {
+/*  Returns a new matrix with the given rows permuted.
+
+    Inputs: self - The matrix to permute.
+            args - A tuple containing the indices of the two rows to permute.
+
+    Outputs: A new copy of self with the given rows permuted.
+*/
+
+    int a,
+        b;
+
+    if (!PyArg_ParseTuple(args, "ii", &a, &b))
+        return NULL;
+
+    if (a < 0) {
+        PyErr_Format(PyExc_ValueError, "Matrix.permute indices cannot be less than 0: %d", a);
+        return NULL;
+    }
+    if (b < 0) {
+        PyErr_Format(PyExc_ValueError, "Matrix.permute indices cannot be less than 0: %d", b);
+        return NULL;
+    }
+
+    return (PyObject *)_matrixPermute((Matrix *)self, (unsigned int)a, (unsigned int)b);
+}
+
+
 PyObject *matrixGaussianElim(PyObject *self) {
 /*  Uses Gaussian elimination to convert the given matrix into an upper triangular matrix.
 
@@ -343,8 +371,8 @@ PyObject *matrixGaussianElim(PyObject *self) {
     Outputs: A new Matrix containing the elimination of self.
 */
 
-    Matrix *upperTriangular;
-    Matrix *m = (Matrix *)self;
+    Matrix *upperTriangular,
+           *m = (Matrix *)self;
 
     if (m->columns != m->rows + 1) {
         PyErr_SetString(PyExc_ValueError, "Gaussian Elimination must be performed on a Matrix with columns = rows + 1.");

@@ -436,6 +436,39 @@ Matrix *_matrixTranspose(Matrix *self) {
 }
 
 
+Matrix *_matrixPermute(Matrix *self, unsigned int a, unsigned int b) {
+/*  Returns a new matrix with the given rows permuted.
+
+    Inputs: self - The matrix to permute.
+
+    Outputs: A new copy of self with the given rows permuted.
+*/
+
+    Matrix *permuted;
+    Vector *tempRow;
+
+    // Ensure that the given integers are in range
+    if (a >= self->rows) {
+        PyErr_Format(PyExc_ValueError, "Given permute index is greater than Matrix.rows: %u", a);
+        return NULL;
+    }
+    if (b >= self->rows) {
+        PyErr_Format(PyExc_ValueError, "Given permute index is greater than Matrix.rows: %u", b);
+        return NULL;
+    }
+
+    if ((permuted = _matrixCopy(self)) == NULL)
+        return NULL;
+
+    // Permute the rows of permuted
+    tempRow = Matrix_GetVector(permuted, a);
+    Matrix_SetVector(permuted, a, Matrix_GetVector(permuted, b));
+    Matrix_SetVector(permuted, b, tempRow);
+
+    return permuted;
+}
+
+
 unsigned char _matrixSymmetrical(Matrix *self) {
 /*  Determines whether or not the given matrix is symmetric.
 

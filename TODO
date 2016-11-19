@@ -1,12 +1,6 @@
-allow vector to be multiplied by matrix
-
 think about adding a linearComb function to do slightly faster linear combinations
 
 setup line intersection func
-
-update vector unit tests with tests including matrices
-
-ensure we can past a list of vectors to matrix.init
 
 pyobject_del in deinits?
 
@@ -15,8 +9,6 @@ use struct Vectors in matrices, not pyobjects
 move static function prototypes to top of .c file
 
 seven dimensional cross prod
-
-allow matrix initialization passing *args of iterables
 
 move all error messages of functions calling pynumber_as_long and pynumber_as_vector_type into those functions, use PyErr_Occurred in calling functions
 

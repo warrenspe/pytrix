@@ -39,6 +39,7 @@ PyObject *matrixColumn(PyObject *, PyObject *);
 PyObject *matrixPermute(PyObject *, PyObject *);
 PyObject *matrixGaussianElim(PyObject *);
 PyObject *matrixFactorLU(PyObject *);
+PyObject *matrixFactorLDU(PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);

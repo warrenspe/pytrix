@@ -23,6 +23,13 @@ class TestMatrix(tests.PytrixTestCase):
         for i, v in enumerate(matrix):
             self.assertEqual(list(v), lists[i])
 
+    def _assertMatrixEqualWithDelta(self, m1, m2):
+        self.assertEqual(m1.rows, m2.rows)
+        self.assertEqual(m1.columns, m2.columns)
+        for i in range(m1.rows):
+            for j in range(m1.columns):
+                self.assertAlmostEqual(m1[i][j], m2[i][j], delta=.0001)
+
     def testMatrixRowsColumns(self):
         self.assertEqual(self.e1.rows, 0)
         self.assertEqual(self.e1.columns, 0)
@@ -302,8 +309,42 @@ class TestMatrix(tests.PytrixTestCase):
             if not isinstance(m, pytrix.Matrix):
                 m = pytrix.Matrix(m)
             l, u = m.factorLU()
-            self.assertEqual(m, l * u)
+            self._assertMatrixEqualWithDelta(m, l * u)
 
         self.assertRaises(ValueError, pytrix.Matrix([1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]).factorLU)
         self.assertRaises(ValueError, pytrix.Matrix([1, 1, 1], [2, 2, 5], [4, 6, 8]).factorLU)
         self.assertRaises(ValueError, pytrix.Matrix([0, 0, 0], [1, 0, 0], [0, 0, 0]).factorLU)
+
+    def testMatrixFactorLDU(self):
+        matrices = [
+            self.e1,
+            self.m1,
+            self.m2,
+            self.zero1,
+            self.zero2,
+            self.zero3,
+            [[1, 1, 1], [2, 3, 5], [4, 6, 8]],
+            [[1, 2, 3, 4], [5, 6, 7, 8]],
+            [[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]],
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]],
+            [[2, -1, 3], [4, 2, 1], [ -6, -1, 2]],
+            [[0, 2, -6, -2, 4], [0, -1, 3, 3, 2], [0, -1, 3, 7, 10]],
+            [[1], [2], [3], [4]]
+        ]
+        for m in matrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            l, d, u = m.factorLDU()
+            self._assertMatrixEqualWithDelta(m, (l * d) * u)
+            self._assertMatrixEqualWithDelta(m, l * (d * u))
+            for i in range(d.rows):
+                for j in range(d.columns):
+                    if i != j:
+                        self.assertEqual(d[i][j], 0)
+            for i in range(min(m.rows, m.columns)):
+                self.assertEqual(l[i][i], 1)
+                self.assertIn(u[i][i], (0, 1))
+
+        self.assertRaises(ValueError, pytrix.Matrix([1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]).factorLDU)
+        self.assertRaises(ValueError, pytrix.Matrix([1, 1, 1], [2, 2, 5], [4, 6, 8]).factorLDU)
+        self.assertRaises(ValueError, pytrix.Matrix([0, 0, 0], [1, 0, 0], [0, 0, 0]).factorLDU)

@@ -429,6 +429,53 @@ PyObject *matrixFactorLU(PyObject *self) {
 }
 
 
+PyObject *matrixFactorLDU(PyObject *self) {
+/*  Factors a matrix A into a lower triangular form, diagonal form and an upper triangular form such that self = L*D*U
+
+    Inputs: self - The matrix to factor.
+
+    Outputs: A PyTuple containing (L, D, U).
+*/
+
+    PyObject *pyTuple;
+    Matrix *l,
+           *d,
+           *u,
+           *m = (Matrix *)self;
+
+    if ((l = _matrixNew(m->rows, m->rows)) == NULL)
+        return NULL;
+    if ((d = _matrixNew(m->rows, m->rows)) == NULL) {
+        Py_DECREF(l);
+        return NULL;
+    }
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL) {
+        Py_DECREF(l);
+        Py_DECREF(d);
+        return NULL;
+    }
+
+    if (!_matrixPALDU(NULL, m, l, d, u, 0)) {
+        Py_DECREF(l);
+        Py_DECREF(d);
+        Py_DECREF(u);
+        return NULL;
+    }
+
+    if ((pyTuple = PyTuple_New(3)) == NULL) {
+        Py_DECREF(l);
+        Py_DECREF(d);
+        Py_DECREF(u);
+        return NULL;
+    }
+    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)l);
+    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)d);
+    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)u);
+
+    return pyTuple;
+}
+
+
 PyObject *matrixInvertible(PyObject *self) {
 
 

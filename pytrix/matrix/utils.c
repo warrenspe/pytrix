@@ -621,7 +621,7 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
 
         // Record the pivot in d if passed
         if (d != NULL) {
-            Matrix_SetValue(d, row, col, pivot);
+            Matrix_SetValue(d, row, row, pivot);
 
             // Reduce this row now that we're done with it
             for (colIter = col; colIter < u->columns; colIter++)

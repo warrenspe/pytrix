@@ -84,8 +84,12 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Factor this matrix into three new matrices L, D & U such that self = L * D * U with L being lower "
                   "triangular , D being diagonal, and U being upper triangular.")},
     {"factorPLU", (PyCFunction)matrixFactorPLU, METH_NOARGS,
-        PyDoc_STR("Factor this matrix into three new matrices P, D & U such that (P^-1) * self = L * U with P being "
+        PyDoc_STR("Factor this matrix into three new matrices P, L & U such that self = P * L * U with P being "
                   "a permutation matrix, L being lower triangular, and U being upper triangular.")},
+    {"factorPLDU", (PyCFunction)matrixFactorPLDU, METH_NOARGS,
+        PyDoc_STR("Factor this matrix into four new matrices P, L, D & U such that self = P * L * D * U with P being "
+                  "a permutation matrix, L being lower triangular, D being a diagonal matrix, and U being upper "
+                  "triangular.")},
     {NULL}  /* Sentinel */
 };
 

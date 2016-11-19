@@ -40,6 +40,7 @@ PyObject *matrixGaussianElim(PyObject *);
 PyObject *matrixFactorLU(PyObject *);
 PyObject *matrixFactorLDU(PyObject *);
 PyObject *matrixFactorPLU(PyObject *);
+PyObject *matrixFactorPLDU(PyObject *);
 PyObject *matrixIsSymmetrical(PyObject *);
 PyObject *matrixIsIdentity(PyObject *);
 PyObject *matrixIsInvertible(PyObject *);

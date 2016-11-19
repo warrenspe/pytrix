@@ -463,7 +463,7 @@ PyObject *matrixFactorLDU(PyObject *self) {
 
 PyObject *matrixFactorPLU(PyObject *self) {
 /*  Factors a matrix A into a lower triangular form, upper triangular form and permutation matrix
-    such that self = (P^-1) * A = L * U
+    such that self = A = P * L * U
 
     Inputs: self - The matrix to factor.
 
@@ -504,6 +504,64 @@ PyObject *matrixFactorPLU(PyObject *self) {
     PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)p);
     PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)l);
     PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)u);
+
+    return pyTuple;
+}
+
+
+PyObject *matrixFactorPLDU(PyObject *self) {
+/*  Factors a matrix A into a lower triangular form, upper triangular form, diagonal form,
+    and permutation matrix such that self = A = P * L * D * U
+
+    Inputs: self - The matrix to factor.
+
+    Outputs: A PyTuple containing (P, L, D, U).
+*/
+
+    PyObject *pyTuple;
+    Matrix *p,
+           *l,
+           *d,
+           *u,
+           *m = (Matrix *)self;
+
+    if ((l = _matrixNew(m->rows, m->rows)) == NULL)
+        return NULL;
+    if ((p = _matrixNew(m->rows, m->rows)) == NULL) {
+        Py_DECREF(l);
+        return NULL;
+    }
+    if ((d = _matrixNew(m->rows, m->rows)) == NULL) {
+        Py_DECREF(p);
+        Py_DECREF(l);
+        return NULL;
+    }
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL) {
+        Py_DECREF(p);
+        Py_DECREF(l);
+        Py_DECREF(d);
+        return NULL;
+    }
+
+    if (!_matrixPALDU(p, m, l, d, u, 1)) {
+        Py_DECREF(p);
+        Py_DECREF(l);
+        Py_DECREF(d);
+        Py_DECREF(u);
+        return NULL;
+    }
+
+    if ((pyTuple = PyTuple_New(4)) == NULL) {
+        Py_DECREF(p);
+        Py_DECREF(l);
+        Py_DECREF(d);
+        Py_DECREF(u);
+        return NULL;
+    }
+    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)p);
+    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)l);
+    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)d);
+    PyTuple_SET_ITEM(pyTuple, 3, (PyObject *)u);
 
     return pyTuple;
 }

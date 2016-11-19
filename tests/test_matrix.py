@@ -270,10 +270,15 @@ class TestMatrix(tests.PytrixTestCase):
                 [0, 0, 1, 0],
                 [0, 0, 0, 0],
         )
-        self.assertRaises(ValueError, self.e1.gaussianElim)
-        self.assertRaises(ValueError, self.zero1.gaussianElim)
-        self.assertRaises(ValueError, self.zero2.gaussianElim)
-        self.assertRaises(ValueError, self.m1.gaussianElim)
+        self._assertMatrixEqual(self.m1.gaussianElim(),
+                [1, 2, 3],
+                [0, -3, -6],
+                [0, 0, 0]
+        )
+        self.assertEqual(self.e1.gaussianElim(), self.e1)
+        self.assertEqual(self.zero1.gaussianElim(), self.zero1)
+        self.assertEqual(self.zero2.gaussianElim(), self.zero2)
+        self.assertEqual(self.zero3.gaussianElim(), self.zero3)
 
     def testMatrixPermute(self):
         self.assertRaises(ValueError, self.e1.permute, 0, 0)
@@ -288,6 +293,39 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(self.m1, self.m1.permute(0, 0))
         self.assertEqual(self.m1, self.m2.transpose().permute(0, 2).transpose().permute(0, 2))
         self._assertMatrixEqual(self.m1.permute(0, 2), [7, 8, 9], [4, 5, 6], [1, 2, 3])
+
+    def testMatrixSymmetrical(self):
+        self.assertTrue(self.e1.isSymmetrical())
+        self.assertTrue(self.zero1.isSymmetrical())
+        self.assertTrue(self.zero2.isSymmetrical())
+        self.assertTrue(self.zero3.isSymmetrical())
+        self.assertFalse(self.m1.isSymmetrical())
+        self.assertFalse(self.m2.isSymmetrical())
+
+        self.assertFalse(pytrix.Matrix([1, 2, 3]).isSymmetrical())
+        self.assertFalse(pytrix.Matrix([1, 2, 3], [4, 5, 6]).isSymmetrical())
+
+    def testMatrixRank(self):
+        matrices = [
+            (self.e1, 0),
+            (self.m1, 2),
+            (self.m2, 2),
+            (self.zero1, 0),
+            (self.zero2, 0),
+            (self.zero3, 0),
+            ([[1, 1, 1], [2, 3, 5], [4, 6, 8]], 3),
+            ([[1, 2, 3, 4], [5, 6, 7, 8]], 2),
+            ([[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]], 2),
+            ([[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]], 2),
+            ([[2, -1, 3], [4, 2, 1], [ -6, -1, 2]], 3),
+            ([[0, 2, -6, -2, 4], [0, -1, 3, 3, 2], [0, -1, 3, 7, 10]], 2),
+            ([[1], [2], [3], [4]], 1)
+        ]
+
+        for m, rank in matrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            self.assertEqual(m.rank(), rank)
 
     def testMatrixFactorLU(self):
         matrices = [

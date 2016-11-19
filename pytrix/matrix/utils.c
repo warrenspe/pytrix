@@ -542,6 +542,7 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
     // Ensure that all the matrices given have the same dimensions as a.
     if (u == NULL || !_assertMatrixDimensionsEqual(a, u))
         return 0;
+    _matrixInitBlank(u);
     if (l != NULL) {
         if (l->columns != l->rows) {
             PyErr_SetString(PyExc_ValueError, "Lower matrix argument to PALDU must be square.");

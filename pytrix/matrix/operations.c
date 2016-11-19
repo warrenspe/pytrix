@@ -359,11 +359,6 @@ PyObject *matrixGaussianElim(PyObject *self) {
     Matrix *upperTriangular,
            *m = (Matrix *)self;
 
-    if (m->columns != m->rows + 1) {
-        PyErr_SetString(PyExc_ValueError, "Gaussian Elimination must be performed on a Matrix with columns = rows + 1.");
-        return NULL;
-    }
-
     if ((upperTriangular = _matrixNew(m->rows, m->columns)) == NULL)
         return NULL;
 
@@ -564,6 +559,41 @@ PyObject *matrixFactorPLDU(PyObject *self) {
     PyTuple_SET_ITEM(pyTuple, 3, (PyObject *)u);
 
     return pyTuple;
+}
+
+
+PyObject *matrixRank(PyObject *self) {
+/*  Determines the rank of this matrix.
+
+    Inputs: self - The matrix to determine the rank of.
+
+    Outputs: A PyNumber containing the rank of self.
+*/
+
+    unsigned long rank = 0;
+    unsigned int row = 0,
+                 col;
+    Matrix *m = (Matrix *)self,
+           *u;
+
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL)
+        return NULL;
+
+    if (!_matrixPALDU(NULL, m, NULL, NULL, u, 1)) {
+        Py_DECREF(u);
+        return NULL;
+    }
+
+    // Calculate the rank of u
+    for (col = 0; col < u->columns && row < u->rows; col++) {
+        if (Matrix_GetValue(u, row, col) != 0) {
+            rank++;
+            row++;
+        }
+    }
+
+    Py_DECREF(u);
+    return PyLong_FromUnsignedLong(rank);
 }
 
 

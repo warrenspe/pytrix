@@ -15,3 +15,7 @@ move all error messages of functions calling pynumber_as_long and pynumber_as_ve
 help() docstrings for functions, especially init
 
 unsigned int return functions return 0 on success and >0 on failure
+
+-- upper tri -> RRE for factor functions
+isuppertriangular
+islowertriangular

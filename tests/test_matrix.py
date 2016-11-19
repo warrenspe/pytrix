@@ -348,3 +348,39 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, pytrix.Matrix([1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]).factorLDU)
         self.assertRaises(ValueError, pytrix.Matrix([1, 1, 1], [2, 2, 5], [4, 6, 8]).factorLDU)
         self.assertRaises(ValueError, pytrix.Matrix([0, 0, 0], [1, 0, 0], [0, 0, 0]).factorLDU)
+
+    def testMatrixFactorPLU(self):
+        matrices = [
+            self.e1,
+            self.m1,
+            self.m2,
+            self.zero1,
+            self.zero2,
+            self.zero3,
+            [[1, 1, 1], [2, 3, 5], [4, 6, 8]],
+            [[1, 1, 1], [2, 2, 5], [4, 6, 8]],
+            [[1, 2, 3, 4], [5, 6, 7, 8]],
+            [[0, 0, 0], [1, 0, 0], [0, 0, 0]],
+            [[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]],
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]],
+            [[2, -1, 3], [4, 2, 1], [ -6, -1, 2]],
+            [[0, 2, -6, -2, 4], [0, -1, 3, 3, 2], [0, -1, 3, 7, 10]],
+            [[1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]],
+            [[1], [2], [3], [4]]
+        ]
+        for m in matrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            p, l, u = m.factorPLU()
+            self._assertMatrixEqualWithDelta(m, (p * l) * u)
+            self._assertMatrixEqualWithDelta(m, p * (l * u))
+            # Assert that for matrices which can be LU factored, p is the identity matrix
+            try:
+                m.factorLU()
+                p, _, _ = m.factorPLU()
+                self.assertTrue(p.isIdentity())
+
+            except ValueError:
+                # Otherwise it is NOT the identity matrix
+                p, _, _ = m.factorPLU()
+                self.assertFalse(p.isIdentity())

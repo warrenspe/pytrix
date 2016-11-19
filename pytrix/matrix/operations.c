@@ -260,21 +260,6 @@ PyObject *matrixTranspose(PyObject *self) {
 }
 
 
-PyObject *matrixSymmetrical(PyObject *self) {
-/*  Determines whether or not self is symmetrical.
-
-    Inputs: self - The Matrix to determine whether or not is symmetrical.
-
-    Outputs: A PyTrue or PyFalse depending on whether or not self is symmetrical.
-*/
-
-    if (_matrixSymmetrical((Matrix *)self))
-        Py_RETURN_TRUE;
-
-    Py_RETURN_FALSE;
-}
-
-
 PyObject *matrixRow(PyObject *self, PyObject *idx) {
 /*  Returns the ith row from the Matrix self.
 
@@ -476,8 +461,100 @@ PyObject *matrixFactorLDU(PyObject *self) {
 }
 
 
-PyObject *matrixInvertible(PyObject *self) {
+PyObject *matrixFactorPLU(PyObject *self) {
+/*  Factors a matrix A into a lower triangular form, upper triangular form and permutation matrix
+    such that self = (P^-1) * A = L * U
+
+    Inputs: self - The matrix to factor.
+
+    Outputs: A PyTuple containing (P, L, U).
+*/
+
+    PyObject *pyTuple;
+    Matrix *p,
+           *l,
+           *u,
+           *m = (Matrix *)self;
+
+    if ((l = _matrixNew(m->rows, m->rows)) == NULL)
+        return NULL;
+    if ((p = _matrixNew(m->rows, m->rows)) == NULL) {
+        Py_DECREF(l);
+        return NULL;
+    }
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL) {
+        Py_DECREF(l);
+        Py_DECREF(p);
+        return NULL;
+    }
+
+    if (!_matrixPALDU(p, m, l, NULL, u, 1)) {
+        Py_DECREF(l);
+        Py_DECREF(p);
+        Py_DECREF(u);
+        return NULL;
+    }
+
+    if ((pyTuple = PyTuple_New(3)) == NULL) {
+        Py_DECREF(l);
+        Py_DECREF(p);
+        Py_DECREF(u);
+        return NULL;
+    }
+    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)p);
+    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)l);
+    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)u);
+
+    return pyTuple;
+}
+
+
+PyObject *matrixIsSymmetrical(PyObject *self) {
+/*  Determines whether or not self is symmetrical.
+
+    Inputs: self - The Matrix to determine whether or not is symmetrical.
+
+    Outputs: A PyTrue or PyFalse depending on whether or not self is symmetrical.
+*/
+
+    if (_matrixSymmetrical((Matrix *)self))
+        Py_RETURN_TRUE;
+
+    Py_RETURN_FALSE;
+}
+
+
+PyObject *matrixIsIdentity(PyObject *self) {
+/*  Determine whether or not self is an identity matrix.
+
+    Inputs: self - The matrix to determine whether or not it is an identity matrix.
+
+    Outputs: A Python boolean depicting whether or not self is an identity matrix.
+*/
+
+    Matrix *m = (Matrix *)self;
+
+    unsigned int row,
+                 col;
+
+    if (m->rows != m->columns)
+        Py_RETURN_FALSE;
+
+    for (row = 0; row < m->rows; row++) {
+        for (col = 0; col < m->columns; col++) {
+            if (row != col && Matrix_GetValue(m, row, col) != 0)
+                Py_RETURN_FALSE;
+        }
+    }
+
+    Py_RETURN_TRUE;
+}
+
+
+PyObject *matrixIsInvertible(PyObject *self) {
 
 
     // call PALDU passing just U, check if all diagonal are non-zero
 }
+
+

@@ -106,10 +106,24 @@ Matrix *_matrixCopy(Matrix *m) {
 }
 
 
-unsigned char _matrixInitIdentity(Matrix *m) {
+void _matrixInitBlank(Matrix *m) {
+/*  Initializes a matrix so that it is completely filled with 0s.
+
+    Inputs: m - The matrix to clear.
+*/
+
+    unsigned int row;
+
+    for (row = 0; row < m->rows; row++)
+        memset(Matrix_GetVector(m, row)->data, '\x00', sizeof(VECTOR_TYPE) * m->columns);
+}
+
+
+unsigned char _matrixInitIdentity(Matrix *m, unsigned char blank) {
 /*  Initializes a matrix so that it is an identity matrix.  Requires that m be a square matrix.
 
-    Inputs: m - The matrix to initialize to an identity matrix.
+    Inputs: m     - The matrix to initialize to an identity matrix.
+            blank - 1 or 0 indicating whether or not we should blank the matrix before initializing it
 
     Outputs: 1 if successful, 0 if an error occurred.
 */
@@ -122,12 +136,11 @@ unsigned char _matrixInitIdentity(Matrix *m) {
         return 0;
     }
 
-    for (row = 0; row < m->rows; row++) {
-        // Clear the row
-        memset(Matrix_GetVector(m, row)->data, '\x00', sizeof(VECTOR_TYPE) * m->columns);
-        // Set this rows 1 entry
+    if (blank)
+        _matrixInitBlank(m);
+
+    for (row = 0; row < m->rows; row++)
         Matrix_SetValue(m, row, row, 1);
-    }
 
     return 1;
 }
@@ -538,8 +551,7 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
             PyErr_SetString(PyExc_ValueError, "Lower matrix argument to PALDU's columns must equal input matrix's rows.");
             return 0;
         }
-        if (!_matrixInitIdentity(l))
-            return 0;
+        _matrixInitBlank(l);
     }
     if (d != NULL) {
         if (l == NULL) {
@@ -548,7 +560,7 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
         }
         if (!_assertMatrixDimensionsEqual(l, d))
             return 0;
-        if (!_matrixInitIdentity(d))
+        if (!_matrixInitIdentity(d, 1))
             return 0;
     }
     if (p != NULL) {
@@ -560,6 +572,8 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
             PyErr_SetString(PyExc_ValueError, "Permutation matrix argument to PALDU's columns must equal input matrix's rows.");
             return 0;
         }
+        if (!_matrixInitIdentity(p, 1))
+            return 0;
     }
 
     // Copy the data from a into u; which we will act upon to convert it into an upper trianguler and in the
@@ -587,10 +601,15 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
                         Matrix_SetVector(p, rowIter, tempRow);
                     }
 
-                    // Permute the rows
+                    // Permute the rows of u and l
                     tempRow = Matrix_GetVector(u, row);
                     Matrix_SetVector(u, row, Matrix_GetVector(u, rowIter));
                     Matrix_SetVector(u, rowIter, tempRow);
+                    if (l != NULL) {
+                        tempRow = Matrix_GetVector(l, row);
+                        Matrix_SetVector(l, row, Matrix_GetVector(l, rowIter));
+                        Matrix_SetVector(l, rowIter, tempRow);
+                    }
                     break;
                 }
             }
@@ -631,6 +650,10 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
         // We're done with this row
         row++;
     }
+
+    // Initialize the diagonal 1's of l
+    if (l != NULL && !_matrixInitIdentity(l, 0))
+        return 0;
 
     return 1;
 }

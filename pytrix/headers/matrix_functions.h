@@ -33,20 +33,24 @@ PyObject *matrixNeg(PyObject *);
 int matrixTrue(Matrix *);
 PyObject *matrixRichCmp(PyObject *, PyObject *, int);
 PyObject *matrixTranspose(PyObject *);
-PyObject *matrixSymmetrical(PyObject *);
 PyObject *matrixRow(PyObject *, PyObject *);
 PyObject *matrixColumn(PyObject *, PyObject *);
 PyObject *matrixPermute(PyObject *, PyObject *);
 PyObject *matrixGaussianElim(PyObject *);
 PyObject *matrixFactorLU(PyObject *);
 PyObject *matrixFactorLDU(PyObject *);
+PyObject *matrixFactorPLU(PyObject *);
+PyObject *matrixIsSymmetrical(PyObject *);
+PyObject *matrixIsIdentity(PyObject *);
+PyObject *matrixIsInvertible(PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);
 Matrix *_matrixNew(unsigned int, unsigned int);
 void _matrixCopyData(Matrix *, Matrix *);
 Matrix *_matrixCopy(Matrix *);
-unsigned char _matrixInitIdentity(Matrix *);
+void _matrixInitBlank(Matrix *);
+unsigned char _matrixInitIdentity(Matrix *, unsigned char);
 unsigned char _assertMatrix(PyObject *);
 unsigned char _assertMatrixDimensionsEqual(Matrix *, Matrix *);
 unsigned char _matricesEqual(Matrix *, Matrix *);

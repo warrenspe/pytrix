@@ -382,12 +382,50 @@ PyObject *matrixGaussianElim(PyObject *self) {
     if ((upperTriangular = _matrixNew(m->rows, m->columns)) == NULL)
         return NULL;
 
-    if (!_matrixPALDU(NULL, m, NULL, NULL, upperTriangular)) {
+    if (!_matrixPALDU(NULL, m, NULL, NULL, upperTriangular, 1)) {
         Py_DECREF(upperTriangular);
         return NULL;
     }
 
     return (PyObject *)upperTriangular;
+}
+
+
+PyObject *matrixFactorLU(PyObject *self) {
+/*  Factors a matrix A into a lower triangular form and an upper triangular form such that self = L*U
+
+    Inputs: self - The matrix to factor.
+
+    Outputs: A PyTuple containing (L, U).
+*/
+
+    PyObject *pyTuple;
+    Matrix *l,
+           *u,
+           *m = (Matrix *)self;
+
+    if ((l = _matrixNew(m->rows, m->rows)) == NULL)
+        return NULL;
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL) {
+        Py_DECREF(l);
+        return NULL;
+    }
+
+    if (!_matrixPALDU(NULL, m, l, NULL, u, 0)) {
+        Py_DECREF(l);
+        Py_DECREF(u);
+        return NULL;
+    }
+
+    if ((pyTuple = PyTuple_New(2)) == NULL) {
+        Py_DECREF(l);
+        Py_DECREF(u);
+        return NULL;
+    }
+    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)l);
+    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)u);
+
+    return pyTuple;
 }
 
 

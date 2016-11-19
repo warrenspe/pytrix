@@ -75,6 +75,9 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Determines whether or not this Matrix is symmetrical.")},
     {"gaussianElim", (PyCFunction)matrixGaussianElim, METH_NOARGS,
         PyDoc_STR("Performs Gaussian elimination on this Matrix to convert it into upper triangular form.")},
+    {"factorLU", (PyCFunction)matrixFactorLU, METH_NOARGS,
+        PyDoc_STR("Factor this matrix into two new matrices L & U such that self = L * U with L being lower "
+                  "triangular and U being upper triangular.")},
     {NULL}  /* Sentinel */
 };
 

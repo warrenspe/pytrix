@@ -38,6 +38,7 @@ PyObject *matrixRow(PyObject *, PyObject *);
 PyObject *matrixColumn(PyObject *, PyObject *);
 PyObject *matrixPermute(PyObject *, PyObject *);
 PyObject *matrixGaussianElim(PyObject *);
+PyObject *matrixFactorLU(PyObject *);
 
 // utils.c
 Matrix *_matrixNewBlank(unsigned int, unsigned int);
@@ -57,7 +58,7 @@ Matrix *_matrixNeg(Matrix *);
 Matrix *_matrixTranspose(Matrix *);
 Matrix *_matrixPermute(Matrix *, unsigned int, unsigned int);
 unsigned char _matrixSymmetrical(Matrix *);
-unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *);
+unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *, unsigned char);
 
 // strassen.c
 Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);

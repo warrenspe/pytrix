@@ -498,16 +498,18 @@ unsigned char _matrixSymmetrical(Matrix *self) {
 }
 
 
-unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u) {
+unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u, unsigned char allowPerms) {
 /*  Calculates the (P^-1)A=LDU decomposition for the given Matrix a.
     Notes:
-        * All parameters other than a, and u are optional.  If passed, they should be a pointer to an empty Matrix
-          object. If not passed, they will not be computed.
+        * All parameters other than a, u and allowPerms are optional.  If passed, they should be a pointer to an empty
+          Matrix object. If not passed, they will not be computed.
         * p is the inverse of a matrix constructed from the permutations applied to u during decomposition.
         * l is a unit lower-triangular matrix constructed from the row operations applied to u during decomposition.
         * d is a diagonal matrix constructed from the pivots of L
             if d is passed, l must also be passed.
         * u is a unit upper-triangular matrix constructed from the remains of a after decomposition.
+        * allowPerms is a boolean indicating whether or not we're allowed to make permutations to u.
+            if 0 and a permutation is required, an exception is set and 0 returned.
 
     Inputs: a       - The matrix to perform the decomposition on.
             p, l, d - Either NULL pointers or pointers to Matrix objects to be populated.
@@ -572,6 +574,12 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
             for (rowIter = row + 1; rowIter < u->rows; rowIter++) {
                 // If we've found a row to permute with
                 if (Matrix_GetValue(u, rowIter, col) != 0) {
+                    // If we're not allowed to permute, raise an exception
+                    if (!allowPerms) {
+                        PyErr_SetString(PyExc_ValueError, "Cannot factor non-invertible Matrix.");
+                        return 0;
+                    }
+
                     // Update p
                     if (p != NULL) {
                         tempRow = Matrix_GetVector(p, row);
@@ -612,12 +620,13 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
         }
 
         // Record the pivot in d if passed
-        if (d != NULL)
+        if (d != NULL) {
             Matrix_SetValue(d, row, col, pivot);
 
-        // Reduce this row now that we're done with it
-        for (colIter = col; colIter < u->columns; colIter++)
-            Matrix_SetValue(u, row, colIter, Matrix_GetValue(u, row, colIter) / pivot);
+            // Reduce this row now that we're done with it
+            for (colIter = col; colIter < u->columns; colIter++)
+                Matrix_SetValue(u, row, colIter, Matrix_GetValue(u, row, colIter) / pivot);
+        }
 
         // We're done with this row
         row++;

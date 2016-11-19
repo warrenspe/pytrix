@@ -564,6 +564,7 @@ PyObject *matrixFactorPLDU(PyObject *self) {
 
 PyObject *matrixRank(PyObject *self) {
 /*  Determines the rank of this matrix.
+    The rank of a matrix is a count of the number of linearly idnependent rows in it.
 
     Inputs: self - The matrix to determine the rank of.
 
@@ -594,6 +595,32 @@ PyObject *matrixRank(PyObject *self) {
 
     Py_DECREF(u);
     return PyLong_FromUnsignedLong(rank);
+}
+
+
+PyObject *matrixTrace(PyObject *self) {
+/*  Determines the trace of this matrix.
+    The trace of a matrix is a sum of its components along the diagonal.
+    Can only be computed on square matrices.
+
+    Inputs: self - The matrix to calculate the trace for.
+
+    Outputs: A PyNumber containing the trace of self.
+*/
+
+    Matrix *m = (Matrix *)self;
+    VECTOR_TYPE trace = 0;
+    unsigned int row;
+
+    if (m->rows != m->columns) {
+        PyErr_SetString(PyExc_ValueError, "Matrix.trace can only computed on square matrices.");
+        return NULL;
+    }
+
+    for (row = 0; row < m->rows; row++)
+        trace += Matrix_GetValue(m, row, row);
+
+    return PyNumber_FROM_VECTOR_TYPE(trace);
 }
 
 

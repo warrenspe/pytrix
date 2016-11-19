@@ -42,6 +42,7 @@ PyObject *matrixFactorLDU(PyObject *);
 PyObject *matrixFactorPLU(PyObject *);
 PyObject *matrixFactorPLDU(PyObject *);
 PyObject *matrixRank(PyObject *);
+PyObject *matrixTrace(PyObject *);
 PyObject *matrixIsSymmetrical(PyObject *);
 PyObject *matrixIsIdentity(PyObject *);
 PyObject *matrixIsInvertible(PyObject *);

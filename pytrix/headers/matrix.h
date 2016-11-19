@@ -77,6 +77,8 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Determines whether or not this Matrix is an identity matrix.")},
     {"rank", (PyCFunction)matrixRank, METH_NOARGS,
         PyDoc_STR("Determines the rank of this matrix.")},
+    {"trace", (PyCFunction)matrixTrace, METH_NOARGS,
+        PyDoc_STR("Determines the trace of this matrix.")},
     {"gaussianElim", (PyCFunction)matrixGaussianElim, METH_NOARGS,
         PyDoc_STR("Performs Gaussian elimination on this Matrix to convert it into upper triangular form.")},
     {"factorLU", (PyCFunction)matrixFactorLU, METH_NOARGS,

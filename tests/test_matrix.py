@@ -294,6 +294,24 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(self.m1, self.m2.transpose().permute(0, 2).transpose().permute(0, 2))
         self._assertMatrixEqual(self.m1.permute(0, 2), [7, 8, 9], [4, 5, 6], [1, 2, 3])
 
+    def testMatrixTrace(self):
+        self.assertEqual(self.e1.trace(), 0)
+        self.assertEqual(self.m1.trace(), 15)
+        self.assertEqual(self.m2.trace(), 15)
+        self.assertEqual(self.zero1.trace(), 0)
+        self.assertEqual(self.zero2.trace(), 0)
+        self.assertEqual(self.zero3.trace(), 0)
+        self.assertEqual(pytrix.Matrix([[1, 1, 1], [2, 3, 5], [4, 6, 8]]).trace(), 12)
+        self.assertEqual(pytrix.Matrix([[1, 1, 1], [2, 2, 5], [4, 6, 8]]).trace(), 11)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3, 4], [5, 6, 7, 8]]).trace),
+        self.assertEqual(pytrix.Matrix([[0, 0, 0], [1, 0, 0], [0, 0, 0]]).trace(), 0)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]]).trace),
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]]).trace),
+        self.assertEqual(pytrix.Matrix([[2, -1, 3], [4, 2, 1], [-6, -1, 2]]).trace(), 6)
+        self.assertRaises(ValueError, pytrix.Matrix([[0, 2, -6, -2, 4], [0, -1, 3, 3, 2], [0, -1, 3, 7, 10]]).trace),
+        self.assertEqual(pytrix.Matrix([[1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]]).trace(), 10)
+        self.assertRaises(ValueError, pytrix.Matrix([[1], [2], [3], [4]]).trace)
+
     def testMatrixSymmetrical(self):
         self.assertTrue(self.e1.isSymmetrical())
         self.assertTrue(self.zero1.isSymmetrical())

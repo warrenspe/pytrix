@@ -83,6 +83,8 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Determines the rank of this matrix.")},
     {"trace", (PyCFunction)matrixTrace, METH_NOARGS,
         PyDoc_STR("Determines the trace of this matrix.")},
+    {"determinant", (PyCFunction)matrixDeterminant, METH_NOARGS,
+        PyDoc_STR("Determines the determinant of this matrix.")},
     {"gaussianElim", (PyCFunction)matrixGaussianElim, METH_NOARGS,
         PyDoc_STR("Performs Gaussian elimination on this Matrix to convert it into upper triangular form.")},
     {"factorLU", (PyCFunction)matrixFactorLU, METH_NOARGS,

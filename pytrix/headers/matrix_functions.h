@@ -43,6 +43,7 @@ PyObject *matrixFactorPLU(PyObject *);
 PyObject *matrixFactorPLDU(PyObject *);
 PyObject *matrixInverse(PyObject *);
 PyObject *matrixRank(PyObject *);
+PyObject *matrixDeterminant(PyObject *);
 PyObject *matrixTrace(PyObject *);
 PyObject *matrixIsSymmetrical(PyObject *);
 PyObject *matrixIsIdentity(PyObject *);
@@ -69,6 +70,7 @@ Matrix *_matrixPermute(Matrix *, unsigned int, unsigned int);
 unsigned char _matrixInvertible(Matrix *);
 unsigned char _matrixSymmetrical(Matrix *);
 unsigned int _matrixRank(Matrix *);
+VECTOR_TYPE _matrixDeterminant(Matrix *);
 unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *, unsigned char);
 Matrix *_matrixInverse(Matrix *);
 

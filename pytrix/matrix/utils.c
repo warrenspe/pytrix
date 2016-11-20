@@ -500,8 +500,7 @@ unsigned char _matrixInvertible(Matrix *m) {
         return Matrix_GetValue(m, 0, 0) != 0;
 
     if (m->rows == 2) {
-        return ((Matrix_GetValue(m, 1, 1) * Matrix_GetValue(m, 0, 0)) -
-                      (Matrix_GetValue(m, 0, 1) * Matrix_GetValue(m, 1, 0))) != 0;
+        return _matrixDeterminant(m) != 0;
     }
 
     rank = _matrixRank((Matrix *)m);
@@ -576,6 +575,86 @@ unsigned int _matrixRank(Matrix *m) {
 
     Py_DECREF(u);
     return rank;
+}
+
+
+VECTOR_TYPE _matrixDeterminant(Matrix *m) {
+/*  Calculates the determinant of a given matrix.
+
+    Inputs: m - The matrix to take the determinant of.
+
+    Outputs: The determinant of m.
+             Calling functions should test whether or not an error occurred with PyErr_Occurred.
+*/
+
+    unsigned int row,
+                 col,
+                 tempIter,
+                 permutations = 0;
+    Matrix *tempM;
+    Vector *tempRow;
+    VECTOR_TYPE determinant = 1,
+                multiplier;
+
+    PyErr_Clear();
+
+    if (m->columns != m->rows) {
+        PyErr_SetString(PyExc_ValueError, "Cannot take determinant of a non-square matrix");
+        return 0;
+    }
+
+    if (m->rows == 1)
+        return Matrix_GetValue(m, 0, 0);
+
+    if (m->rows == 2)
+        return ((Matrix_GetValue(m, 1, 1) * Matrix_GetValue(m, 0, 0)) -
+                      (Matrix_GetValue(m, 0, 1) * Matrix_GetValue(m, 1, 0)));
+
+    if ((tempM = _matrixCopy(m)) == NULL)
+        return 0;
+
+    for (col = 0; col < tempM->columns; col++) {
+        // Find a pivot row and move it into its correct position
+        for (row = col; row < tempM->rows; row++) {
+            if (Matrix_GetValue(tempM, row, col) != 0) {
+                // Permute this row to its correct position
+                if (row != col) {
+                    permutations++;
+                    tempRow = Matrix_GetVector(tempM, row);
+                    Matrix_SetVector(tempM, row, Matrix_GetVector(tempM, col));
+                    Matrix_SetVector(tempM, col, tempRow);
+                }
+                break;
+            }
+        }
+        // If we were unable to find a pivot, our determinant is 0
+        if (row == tempM->rows) {
+            Py_DECREF(tempM);
+            return 0;
+        }
+
+        // Eliminate all lower rows
+        for (row = col + 1; row < tempM->rows; row++) {
+            if (Matrix_GetValue(tempM, row, col) != 0) {
+                multiplier = Matrix_GetValue(tempM, row, col) / Matrix_GetValue(tempM, col, col);
+                for (tempIter = col; tempIter < tempM->columns; tempIter++) {
+                    Matrix_SetValue(tempM, row, tempIter, Matrix_GetValue(tempM, row, tempIter) -
+                                                     (multiplier * Matrix_GetValue(tempM, col, tempIter)));
+                }
+            }
+        }
+    }
+
+    for (tempIter = 0; tempIter < m->rows; tempIter++)
+        determinant *= Matrix_GetValue(tempM, tempIter, tempIter);
+
+    // If we performed an odd number of permutations make the determinant negative.
+    if (permutations & 1)
+        determinant = -determinant;
+
+    Py_DECREF(tempM);
+
+    return determinant;
 }
 
 
@@ -765,8 +844,11 @@ Matrix *_matrixInverse(Matrix *m) {
 
     // If m is 2 x 2 we can do this faster without guassian elimination
     if (m->rows == 2) {
-        multiplier = (Matrix_GetValue(m, 1, 1) * Matrix_GetValue(m, 0, 0)) -
-                      (Matrix_GetValue(m, 0, 1) * Matrix_GetValue(m, 1, 0));
+        multiplier = _matrixDeterminant(m);
+        if (PyErr_Occurred()) {
+            Py_DECREF(inverse);
+            return NULL;
+        }
 
         // Assert that it's invertible
         if (multiplier == 0) {

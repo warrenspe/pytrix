@@ -594,6 +594,31 @@ PyObject *matrixRank(PyObject *self) {
 }
 
 
+PyObject *matrixDeterminant(PyObject *self) {
+/*  Calculates the determinant of this matrix.
+
+    Inputs: self - The matrix to take the determinant of.
+
+    Outputs: A PyNumber containing the determinant of self if successful, or an error if not.
+*/
+
+    VECTOR_TYPE determinant;
+    Matrix *m = (Matrix *)self;
+
+    if (m->rows != m->columns) {
+        PyErr_SetString(PyExc_ValueError, "Matrix.determinant must be run on a square matrix.");
+        return NULL;
+    }
+
+    determinant = _matrixDeterminant(m);
+
+    if (PyErr_Occurred())
+        return NULL;
+
+    return PyNumber_FROM_VECTOR_TYPE(determinant);
+}
+
+
 PyObject *matrixTrace(PyObject *self) {
 /*  Determines the trace of this matrix.
     The trace of a matrix is a sum of its components along the diagonal.
@@ -675,5 +700,3 @@ PyObject *matrixIsInvertible(PyObject *self) {
 
     Py_RETURN_FALSE;
 }
-
-

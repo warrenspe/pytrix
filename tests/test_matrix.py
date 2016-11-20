@@ -345,6 +345,39 @@ class TestMatrix(tests.PytrixTestCase):
                 m = pytrix.Matrix(m)
             self.assertEqual(m.rank(), rank)
 
+    def testMatrixDeterminant(self):
+        matrices = [
+            (self.e1, 1),
+            (self.m1, 0),
+            (self.m2, 0),
+            (self.zero1, 0),
+            (self.zero2, 0),
+            (self.zero3, 0),
+            ([[0]], 0),
+            ([[2]], 2),
+            ([[1, 1], [2, 3]], 1),
+            ([[1, 1], [2, 2]], 0),
+            ([[2, 0], [7, 0]], 0),
+            ([[1, 1, 1], [2, 2, 5], [4, 6, 8]], -6),
+            ([[1, 1, 1], [2, 3, 5], [4, 6, 8]], -2),
+            ([[0, 0, 0], [1, 0, 0], [0, 0, 0]], 0),
+            ([[2, -1, 3], [4, 2, 1], [ -6, -1, 2]], 48),
+            ([[1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]], -4),
+            ([[1, 4, 0, 3], [1, 2, 0, 0], [2, 6, 0, 1], [0, 0, 0, 4]], 0),
+        ]
+
+        for m, determinant in matrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+
+            self.assertEqual(m.determinant(), determinant)
+
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3, 4], [5, 6, 7, 8]]).determinant)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]]).determinant)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]]).determinant)
+        self.assertRaises(ValueError, pytrix.Matrix([[1], [2], [3], [4]]).determinant)
+        self.assertRaises(ValueError, pytrix.Matrix([[0, 2, -6, -2, 4], [0, -1, 3, 3, 2], [0, -1, 3, 7, 10]]).determinant)
+
     def testMatrixInverse(self):
         matrices = [
             self.e1,

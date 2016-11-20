@@ -75,6 +75,8 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Determines whether or not this Matrix is symmetrical.")},
     {"isIdentity", (PyCFunction)matrixIsIdentity, METH_NOARGS,
         PyDoc_STR("Determines whether or not this Matrix is an identity matrix.")},
+    {"isInvertible", (PyCFunction)matrixIsInvertible, METH_NOARGS,
+        PyDoc_STR("Determines whether or not this Matrix is invertible.")},
     {"inverse", (PyCFunction)matrixInverse, METH_NOARGS,
         PyDoc_STR("Constructs a new Matrix from the inverse of this Matrix.")},
     {"rank", (PyCFunction)matrixRank, METH_NOARGS,

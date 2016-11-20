@@ -66,7 +66,9 @@ Matrix *_matrixMatrixMul(Matrix *, Matrix *);
 Matrix *_matrixNeg(Matrix *);
 Matrix *_matrixTranspose(Matrix *);
 Matrix *_matrixPermute(Matrix *, unsigned int, unsigned int);
+unsigned char _matrixInvertible(Matrix *);
 unsigned char _matrixSymmetrical(Matrix *);
+unsigned int _matrixRank(Matrix *);
 unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *, unsigned char);
 Matrix *_matrixInverse(Matrix *);
 

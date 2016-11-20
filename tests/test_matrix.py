@@ -348,6 +348,7 @@ class TestMatrix(tests.PytrixTestCase):
     def testMatrixInverse(self):
         matrices = [
             self.e1,
+            [[1, 0], [0, 2]],
             [[1, 1, 1], [2, 3, 5], [4, 6, 8]],
             [[1, 1, 1], [2, 2, 5], [4, 6, 8]],
             [[2, -1, 3], [4, 2, 1], [ -6, -1, 2]],
@@ -365,11 +366,46 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, self.zero3.inverse)
         self.assertRaises(ValueError, self.m1.inverse)
         self.assertRaises(ValueError, self.m2.inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 0], [2, 0]]).inverse)
         self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3, 4], [5, 6, 7, 8]]).inverse)
         self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]]).inverse)
         self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]]).inverse)
         self.assertRaises(ValueError, pytrix.Matrix([[1], [2], [3], [4]]).inverse)
         self.assertRaises(ValueError, pytrix.Matrix([[0, 0, 0], [1, 0, 0], [0, 0, 0]]).inverse)
+
+    def testMatrixInvertible(self):
+        invertibleMatrices = [
+            self.e1,
+            [[1]],
+            [[1, 0], [0, 2]],
+            [[1, 1, 1], [2, 3, 5], [4, 6, 8]],
+            [[1, 1, 1], [2, 2, 5], [4, 6, 8]],
+            [[2, -1, 3], [4, 2, 1], [ -6, -1, 2]],
+            [[1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]],
+        ]
+        nonInvertibleMatrices = [
+            self.zero1,
+            self.zero2,
+            self.zero3,
+            self.m1,
+            self.m2,
+            [[0]],
+            [[1, 0], [2, 0]],
+            [[1, 2, 3, 4], [5, 6, 7, 8]],
+            [[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]],
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]],
+            [[1], [2], [3], [4]],
+            [[0, 0, 0], [1, 0, 0], [0, 0, 0]]
+        ]
+
+        for m in invertibleMatrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            self.assertTrue(m.isInvertible())
+        for m in nonInvertibleMatrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            self.assertFalse(m.isInvertible())
 
     def testMatrixFactorLU(self):
         matrices = [

@@ -482,6 +482,37 @@ Matrix *_matrixPermute(Matrix *self, unsigned int a, unsigned int b) {
 }
 
 
+unsigned char _matrixInvertible(Matrix *m) {
+/*  Determines whether or not a matrix is invertible.
+
+    Inputs: m - The matrix to test for whether or not it is invertible.
+
+    Outputs: 0 or 1 depending on whether or not m is invertible.
+             Calling functions should check whether or not an error was raised with PyErr_Occurred.
+*/
+
+    unsigned int rank;
+
+    if (m->rows != m->columns)
+        return 0;
+
+    if (m->rows == 1)
+        return Matrix_GetValue(m, 0, 0) != 0;
+
+    if (m->rows == 2) {
+        return ((Matrix_GetValue(m, 1, 1) * Matrix_GetValue(m, 0, 0)) -
+                      (Matrix_GetValue(m, 0, 1) * Matrix_GetValue(m, 1, 0))) != 0;
+    }
+
+    rank = _matrixRank((Matrix *)m);
+
+    if (PyErr_Occurred())
+        return 0;
+
+    return rank == m->rows;
+}
+
+
 unsigned char _matrixSymmetrical(Matrix *self) {
 /*  Determines whether or not the given matrix is symmetric.
 
@@ -508,6 +539,43 @@ unsigned char _matrixSymmetrical(Matrix *self) {
     }
 
     return 1;
+}
+
+
+unsigned int _matrixRank(Matrix *m) {
+/*  Determines the rank of this matrix.
+    The rank of a matrix is a count of the number of linearly idnependent rows in it.
+
+    Inputs: m - The matrix to determine the rank of.
+
+    Outputs: The rank of m.  Note that calling functions should check PyErr_Occurred
+*/
+
+    unsigned int rank = 0;
+    unsigned int row = 0,
+                 col;
+    Matrix *u;
+
+    PyErr_Clear();
+
+    if ((u = _matrixNew(m->rows, m->columns)) == NULL)
+        return 0;
+
+    if (!_matrixPALDU(NULL, m, NULL, NULL, u, 1)) {
+        Py_DECREF(u);
+        return 0;
+    }
+
+    // Calculate the rank of u
+    for (col = 0; col < u->columns && row < u->rows; col++) {
+        if (Matrix_GetValue(u, row, col) != 0) {
+            rank++;
+            row++;
+        }
+    }
+
+    Py_DECREF(u);
+    return rank;
 }
 
 

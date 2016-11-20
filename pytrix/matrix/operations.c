@@ -583,30 +583,14 @@ PyObject *matrixRank(PyObject *self) {
     Outputs: A PyNumber containing the rank of self.
 */
 
-    unsigned long rank = 0;
-    unsigned int row = 0,
-                 col;
-    Matrix *m = (Matrix *)self,
-           *u;
+    unsigned int rank;
 
-    if ((u = _matrixNew(m->rows, m->columns)) == NULL)
+    rank = _matrixRank((Matrix *)self);
+
+    if (PyErr_Occurred())
         return NULL;
 
-    if (!_matrixPALDU(NULL, m, NULL, NULL, u, 1)) {
-        Py_DECREF(u);
-        return NULL;
-    }
-
-    // Calculate the rank of u
-    for (col = 0; col < u->columns && row < u->rows; col++) {
-        if (Matrix_GetValue(u, row, col) != 0) {
-            rank++;
-            row++;
-        }
-    }
-
-    Py_DECREF(u);
-    return PyLong_FromUnsignedLong(rank);
+    return PyLong_FromUnsignedLong((unsigned long)rank);
 }
 
 
@@ -679,9 +663,17 @@ PyObject *matrixIsIdentity(PyObject *self) {
 
 
 PyObject *matrixIsInvertible(PyObject *self) {
+/*  Determines whether or not a matrix is invertible.
 
+    Inputs: self - The matrix to test for whether or not it is invertible.
 
-    // call PALDU passing just U, check if all diagonal are non-zero
+    Outputs: A PyBoolean depicting whether or not self is invertible or not.
+*/
+
+    if (_matrixInvertible((Matrix *)self))
+        Py_RETURN_TRUE;
+
+    Py_RETURN_FALSE;
 }
 
 

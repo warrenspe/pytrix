@@ -41,6 +41,18 @@ Vector *_vectorNew(unsigned int dimensions) {
 }
 
 
+void _vectorCopyData(Vector *in, Vector *out) {
+/*  Copies the data from in to out.
+    Assumes that in.dimensions == out.dimensions.
+
+    Inputs: in  - A pointer to the Vector to copy the data from.
+            out - A pointer to the Vector to copy the data to.
+*/
+
+    memcpy(out->data, in->data, sizeof(VECTOR_TYPE) * out->dimensions);
+}
+
+
 Vector *_vectorCopy(Vector *v) {
 /*  Creates a new copy of the given vector.
 
@@ -54,7 +66,7 @@ Vector *_vectorCopy(Vector *v) {
     if (copy == NULL)
         return NULL;
 
-    memcpy(copy->data, v->data, sizeof(VECTOR_TYPE) * v->dimensions);
+    _vectorCopyData(v, copy);
 
     return copy;
 }

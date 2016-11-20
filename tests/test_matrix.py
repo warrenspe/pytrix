@@ -1,6 +1,3 @@
-# Standard imports
-import math
-
 # Project imports
 import pytrix
 import tests

@@ -1,3 +1,3 @@
 #ifndef Py_TPFLAGS_CHECKTYPES
-#define Py_TPFLAGS_CHECKTYPES 0
+    #define Py_TPFLAGS_CHECKTYPES 0
 #endif

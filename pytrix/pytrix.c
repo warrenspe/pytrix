@@ -40,7 +40,15 @@ void initTypes(PyObject *module) {
 
 
 static PyMethodDef pytrixMethods[] = {
-     {NULL, NULL, 0, NULL}   /* sentinel */
+    {"identityMatrix", (PyCFunction)identityMatrix, METH_VARARGS,
+        PyDoc_STR("Convenience function for constructing identity matrices.")},
+    {"rotation2DMatrix", (PyCFunction)rotation2DMatrix, METH_VARARGS,
+        PyDoc_STR("Convenience function for constructing 2D rotation matrices.")},
+    {"rotation3DMatrix", (PyCFunction)rotation3DMatrix, METH_VARARGS,
+        PyDoc_STR("Convenience function for constructing 3D rotation matrices.")},
+    {"permutationMatrix", (PyCFunction)permutationMatrix, METH_VARARGS,
+        PyDoc_STR("Convenience function for constructing permutation matrices.")},
+    {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
 

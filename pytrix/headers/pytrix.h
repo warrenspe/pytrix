@@ -91,6 +91,9 @@
     #include "matrix/operations.c"
     #include "matrix/strassen.c"
 
+    // Other includes
+    #include "matrixConstructors.c"
+
     // Declarations for DLL import/export
     #ifndef PyMODINIT_FUNC
         #define PyMODINIT_FUNC void

@@ -358,6 +358,85 @@ Vector *_vectorMatrixMul(PyObject *a, PyObject *b) {
 }
 
 
+unsigned char _inplaceMatrixMatrixMul(Matrix *left, Matrix *right, Matrix *out) {
+/*  Performs matrix multiplication of left * right inserting the result into out.
+    Note that out may safely be one of left, right.
+
+    Inputs: left  - The left matrix to multiply
+            right - The right matrix to multiply.
+            out   - The matrix to insert the results into.
+
+    Outputs: 1 if successful, 0 if an error occurred.
+*/
+
+    unsigned int row,
+                 col,
+                 i;
+    Vector *temp;
+    VECTOR_TYPE val = 0;
+
+    if (left->columns != right->rows) {
+        PyErr_SetString(PyExc_ValueError, "A * B Matrix multiplication requires A.columns = B.rows");
+        return 0;
+    }
+
+    if (out->rows != left->rows || out->columns != right->columns) {
+        PyErr_SetString(PyExc_ValueError, "Out Matrix.rows != left Matrix.rows or Out Matrix.columns != right Matrix.Columns");
+        return 0;
+    }
+
+    // If we're doing an in-place left-hand side matrix multiplication
+    if (left == out) {
+        if ((temp = _vectorNew(left->columns)) == NULL)
+            return 0;
+
+        for (row = 0; row < left->rows; row++) {
+            for (col = 0; col < right->columns; col++) {
+                val = 0;
+                for (i = 0; i < left->columns; i++)
+                    val += Matrix_GetValue(left, row, i) * Matrix_GetValue(right, i, col);
+                Vector_SetValue(temp, col, val);
+            }
+            _vectorCopyData(temp, Matrix_GetVector(out, row));
+        }
+
+        Py_DECREF(temp);
+
+    // If we're doing an in-place right-hand side matrix multiplication
+    } else if (right == out) {
+        if ((temp = _vectorNew(left->columns)) == NULL)
+            return 0;
+
+        for (col = 0; col < right->columns; col++) {
+            for (row = 0; row < left->rows; row++) {
+                val = 0;
+                for (i = 0; i < left->columns; i++)
+                    val += Matrix_GetValue(left, row, i) * Matrix_GetValue(right, i, col);
+                Vector_SetValue(temp, row, val);
+            }
+            for (i = 0; i < left->columns; i++)
+                Matrix_SetValue(out, i, col, Vector_GetValue(temp, i));
+        }
+
+        Py_DECREF(temp);
+
+    // Otherwise we're doing regular matrix multiplication
+    } else {
+        // Otherwise use the naive n^3 algorithm
+        for (row = 0; row < left->rows; row++) {
+            for (col = 0; col < right->columns; col++) {
+                val = 0;
+                for (i = 0; i < left->columns; i++)
+                    val += Matrix_GetValue(left, row, i) * Matrix_GetValue(right, i, col);
+                Matrix_SetValue(out, row, col, val);
+            }
+        }
+    }
+
+    return 1;
+}
+
+
 Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
 /*  Multiplies a matrix by another matrix.
 
@@ -367,11 +446,7 @@ Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
     Outputs: A new matrix constructed by performing a * b, or NULL if an error occurred.
 */
 
-    unsigned int row,
-                 col,
-                 i;
     Matrix *outMatrix;
-    VECTOR_TYPE val;
 
     if (a->columns != b->rows) {
         PyErr_SetString(PyExc_ValueError, "A * B Matrix multiplication requires A.columns = B.rows");
@@ -387,13 +462,9 @@ Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
         return NULL;
 
     // Otherwise use the naive n^3 algorithm
-    for (row = 0; row < a->rows; row++) {
-        for (col = 0; col < b->columns; col++) {
-            val = 0;
-            for (i = 0; i < a->columns; i++)
-                val += Matrix_GetValue(a, row, i) * Matrix_GetValue(b, i, col);
-            Matrix_SetValue(outMatrix, row, col, val);
-        }
+    if (!_inplaceMatrixMatrixMul(a, b, outMatrix)) {
+        Py_DECREF(outMatrix);
+        return NULL;
     }
 
     return outMatrix;

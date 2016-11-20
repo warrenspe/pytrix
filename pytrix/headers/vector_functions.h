@@ -40,6 +40,7 @@ PyObject *vectorItem(PyObject *, Py_ssize_t);
 
 // utils.c
 Vector *_vectorNew(unsigned int);
+void _vectorCopyData(Vector *, Vector *);
 Vector *_vectorCopy(Vector *);
 unsigned char _assertVectorDimensionsEqual(Vector *, Vector *);
 unsigned char _assertVector(PyObject *);

@@ -562,6 +562,18 @@ PyObject *matrixFactorPLDU(PyObject *self) {
 }
 
 
+PyObject *matrixInverse(PyObject *self) {
+/*  Constructs and returns the inverse of a given matrix.
+
+    Inputs: self - The matrix to inverse.
+
+    Outputs: A new matrix Object constructed from the inverse of self.
+*/
+
+    return (PyObject *)_matrixInverse((Matrix *)self);
+}
+
+
 PyObject *matrixRank(PyObject *self) {
 /*  Determines the rank of this matrix.
     The rank of a matrix is a count of the number of linearly idnependent rows in it.

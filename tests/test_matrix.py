@@ -345,6 +345,32 @@ class TestMatrix(tests.PytrixTestCase):
                 m = pytrix.Matrix(m)
             self.assertEqual(m.rank(), rank)
 
+    def testMatrixInverse(self):
+        matrices = [
+            self.e1,
+            [[1, 1, 1], [2, 3, 5], [4, 6, 8]],
+            [[1, 1, 1], [2, 2, 5], [4, 6, 8]],
+            [[2, -1, 3], [4, 2, 1], [ -6, -1, 2]],
+            [[1, 4, 2, 3], [1, 2, 1, 0], [2, 6, 3, 1], [0, 0, 1, 4]],
+        ]
+
+        for m in matrices:
+            if not isinstance(m, pytrix.Matrix):
+                m = pytrix.Matrix(m)
+            i = m.inverse()
+            self._assertMatrixEqualWithDelta(i.inverse(), m)
+
+        self.assertRaises(ValueError, self.zero1.inverse)
+        self.assertRaises(ValueError, self.zero2.inverse)
+        self.assertRaises(ValueError, self.zero3.inverse)
+        self.assertRaises(ValueError, self.m1.inverse)
+        self.assertRaises(ValueError, self.m2.inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3, 4], [5, 6, 7, 8]]).inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 0, 2], [3, 6, -1, 8], [1, 2, 1, 0]]).inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9], [20, 25, 30]]).inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[1], [2], [3], [4]]).inverse)
+        self.assertRaises(ValueError, pytrix.Matrix([[0, 0, 0], [1, 0, 0], [0, 0, 0]]).inverse)
+
     def testMatrixFactorLU(self):
         matrices = [
             self.e1,

@@ -658,3 +658,127 @@ unsigned char _matrixPALDU(Matrix *p, Matrix *a, Matrix *l, Matrix *d, Matrix *u
 
     return 1;
 }
+
+
+Matrix *_matrixInverse(Matrix *m) {
+/*  Attempts to find the inverse for the given matrix.
+
+    Inputs: m - The matrix to inverse.
+
+    Outputs: A Matrix object if successful.  NULL if an error occurs.
+*/
+
+    Matrix *inverse,
+           *tempM;
+    Vector *tempRow;
+    VECTOR_TYPE multiplier;
+    unsigned int row,
+                 col,
+                 tempIter;
+
+    if (m->rows != m->columns) {
+        PyErr_SetString(PyExc_ValueError, "Cannot find inverse of non-square matrix.");
+        return NULL;
+    }
+
+    if ((inverse = _matrixNew(m->columns, m->rows)) == NULL)
+        return NULL;
+
+    // If m is 1 x 1 we can do this in 1 operation
+    if (m->rows == 1) {
+        if (Matrix_GetValue(m, 0, 0) == 0) {
+            PyErr_SetString(PyExc_ValueError, "Cannot take inverse of non-invertible matrix.");
+            Py_DECREF(inverse);
+            return NULL;
+        }
+        Matrix_SetValue(inverse, 0, 0, 1 / Matrix_GetValue(m, 0, 0));
+        return inverse;
+    }
+
+    // If m is 2 x 2 we can do this faster without guassian elimination
+    if (m->rows == 2) {
+        multiplier = (Matrix_GetValue(m, 1, 1) * Matrix_GetValue(m, 0, 0)) -
+                      (Matrix_GetValue(m, 0, 1) * Matrix_GetValue(m, 1, 0));
+
+        // Assert that it's invertible
+        if (multiplier == 0) {
+            PyErr_SetString(PyExc_ValueError, "Cannot take inverse of non-invertible matrix.");
+            Py_DECREF(inverse);
+            return NULL;
+        }
+
+        multiplier = 1 / multiplier;
+        Matrix_SetValue(inverse, 0, 0, multiplier * Matrix_GetValue(m, 1, 1));
+        Matrix_SetValue(inverse, 0, 1, -(multiplier * Matrix_GetValue(m, 0, 1)));
+        Matrix_SetValue(inverse, 1, 0, -(multiplier * Matrix_GetValue(m, 1, 0)));
+        Matrix_SetValue(inverse, 1, 1, multiplier * Matrix_GetValue(m, 0, 0));
+        return inverse;
+    }
+
+    if ((tempM = _matrixCopy(m)) == NULL) {
+        Py_DECREF(inverse);
+        return NULL;
+    }
+    if (!_matrixInitIdentity(inverse, 1)) {
+        Py_DECREF(inverse);
+        Py_DECREF(tempM);
+        return NULL;
+    }
+
+    // Otherwise use guassian elimination to construct our inverse matrix
+    for (col = 0; col < tempM->columns; col++) {
+        // Find a pivot row and move it into its correct position
+        for (row = col; row < tempM->rows; row++) {
+            if (Matrix_GetValue(tempM, row, col) != 0) {
+                // Permute this row to its correct position
+                if (row != col) {
+                    tempRow = Matrix_GetVector(tempM, row);
+                    Matrix_SetVector(tempM, row, Matrix_GetVector(tempM, col));
+                    Matrix_SetVector(tempM, col, tempRow);
+                    tempRow = Matrix_GetVector(inverse, row);
+                    Matrix_SetVector(inverse, row, Matrix_GetVector(inverse, col));
+                    Matrix_SetVector(inverse, col, tempRow);
+                }
+                break;
+            }
+        }
+        // Ensure we were able to find a pivot
+        if (row == tempM->rows) {
+            PyErr_SetString(PyExc_ValueError, "Cannot take inverse of non-invertible matrix.");
+            Py_DECREF(inverse);
+            Py_DECREF(tempM);
+            return NULL;
+        }
+
+        // Eliminate all non-pivot rows
+        for (row = 0; row < tempM->rows; row++) {
+            if (row != col && Matrix_GetValue(tempM, row, col) != 0) {
+                multiplier = Matrix_GetValue(tempM, row, col) / Matrix_GetValue(tempM, col, col);
+                for (tempIter = 0; tempIter < tempM->columns; tempIter++) {
+                    // We only have to eliminate tempM row values where tempIter >= col
+                    if (tempIter >= col) {
+                        Matrix_SetValue(tempM, row, tempIter, Matrix_GetValue(tempM, row, tempIter) -
+                                                         (multiplier * Matrix_GetValue(tempM, col, tempIter)));
+                    }
+                    Matrix_SetValue(inverse, row, tempIter, Matrix_GetValue(inverse, row, tempIter) -
+                                                     (multiplier * Matrix_GetValue(inverse, col, tempIter)));
+                }
+            }
+        }
+        // Reduce our pivot row so the pivot is 1
+        if (Matrix_GetValue(tempM, col, col) != 1) {
+            multiplier = 1 / Matrix_GetValue(tempM, col, col);
+            for (tempIter = 0; tempIter < tempM->columns; tempIter++) {
+                // We only have to reduce tempM row values where tempIter >= col
+                if (tempIter >= col) {
+                    Matrix_SetValue(tempM, col, tempIter, multiplier * Matrix_GetValue(tempM, col, tempIter));
+                }
+                Matrix_SetValue(inverse, col, tempIter, multiplier * Matrix_GetValue(inverse, col, tempIter));
+            }
+        }
+    }
+
+    Py_DECREF(tempM);
+
+    return inverse;
+}

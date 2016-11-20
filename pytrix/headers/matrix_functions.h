@@ -41,6 +41,7 @@ PyObject *matrixFactorLU(PyObject *);
 PyObject *matrixFactorLDU(PyObject *);
 PyObject *matrixFactorPLU(PyObject *);
 PyObject *matrixFactorPLDU(PyObject *);
+PyObject *matrixInverse(PyObject *);
 PyObject *matrixRank(PyObject *);
 PyObject *matrixTrace(PyObject *);
 PyObject *matrixIsSymmetrical(PyObject *);
@@ -67,6 +68,7 @@ Matrix *_matrixTranspose(Matrix *);
 Matrix *_matrixPermute(Matrix *, unsigned int, unsigned int);
 unsigned char _matrixSymmetrical(Matrix *);
 unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *, unsigned char);
+Matrix *_matrixInverse(Matrix *);
 
 // strassen.c
 Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);

@@ -19,3 +19,7 @@ unsigned int return functions return 0 on success and >0 on failure
 -- upper tri -> RRE for factor functions
 isuppertriangular
 islowertriangular
+
+partial pivoting in inverse alg
+
+identity, elim, perm matrix constructors - ie special matrix constructors

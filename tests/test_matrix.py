@@ -178,7 +178,7 @@ class TestMatrix(tests.PytrixTestCase):
 
     def testMatrixRow(self):
         self.assertRaises(IndexError, self.e1.row, 0)
-        self.assertRaises(ValueError, self.m1.row, -1)
+        self.assertRaises(IndexError, self.m1.row, -1)
         self.assertRaises(IndexError, self.m1.row, 10)
         self.assertEqual(list(self.m1.row(0)), [1, 2, 3])
         self.assertEqual(list(self.m1.row(1)), [4, 5, 6])
@@ -187,7 +187,7 @@ class TestMatrix(tests.PytrixTestCase):
 
     def testMatrixColumn(self):
         self.assertRaises(IndexError, self.e1.column, 0)
-        self.assertRaises(ValueError, self.m1.column, -1)
+        self.assertRaises(IndexError, self.m1.column, -1)
         self.assertRaises(IndexError, self.m1.column, 10)
         self.assertEqual(list(self.m1.column(0)), [1, 4, 7])
         self.assertEqual(list(self.m1.column(1)), [2, 5, 8])

@@ -63,9 +63,9 @@ static PySequenceMethods MatrixSequenceMethods = {
 };
 
 static PyMethodDef MatrixMethods[] = {
-    {"row", (PyCFunction)matrixRow, METH_O,
+    {"row", (PyCFunction)matrixRow, METH_VARARGS,
         PyDoc_STR("Returns the ith row of this Matrix as a Vector.")},
-    {"column", (PyCFunction)matrixColumn, METH_O,
+    {"column", (PyCFunction)matrixColumn, METH_VARARGS,
         PyDoc_STR("Returns the ith column of this Matrix as a Vector.")},
     {"transpose", (PyCFunction)matrixTranspose, METH_NOARGS,
         PyDoc_STR("Constructs a new Matrix object, from the transpose of this Matrix.")},

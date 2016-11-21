@@ -109,7 +109,7 @@ PyObject *matrixItem(PyObject *self, Py_ssize_t i) {
     unsigned int idx = (unsigned int)i;
 
     if (idx >= m->rows) {
-        PyErr_Format(PyExc_IndexError, "Cannot return row number %x of Matrix with %x rows.", idx, m->rows);
+        PyErr_Format(PyExc_IndexError, "Cannot return row number %u of Matrix with %u rows.", idx, m->rows);
         return NULL;
     }
 
@@ -260,24 +260,24 @@ PyObject *matrixTranspose(PyObject *self) {
 }
 
 
-PyObject *matrixRow(PyObject *self, PyObject *idx) {
+PyObject *matrixRow(PyObject *self, PyObject *args) {
 /*  Returns the ith row from the Matrix self.
 
     Inputs: self - The matrix to return the ith row from.
-            idx  - The row number to return from self.
+            args - A PyTuple containing a PyNumber of the index of the row to return.
 
     Outputs: A Vector object of the ith row in self if successful, NULL if an error occurs.
 */
 
-    unsigned long i = PyNumber_AS_UNSIGNED_LONG(idx);
+    long i;
     Matrix *m = (Matrix *)self;
     Vector *v;
 
-    if (PyErr_Occurred())
+    if (!PyArg_ParseTuple(args, "l", &i))
         return NULL;
 
-    if (i >= m->rows) {
-        PyErr_Format(PyExc_IndexError, "Cannot return row number %lu of Matrix with %x rows.", i, m->rows);
+    if (i >= m->rows || i < 0) {
+        PyErr_Format(PyExc_IndexError, "Cannot return row number %ld of Matrix with %u rows.", i, m->rows);
         return NULL;
     }
 
@@ -288,25 +288,25 @@ PyObject *matrixRow(PyObject *self, PyObject *idx) {
 }
 
 
-PyObject *matrixColumn(PyObject *self, PyObject *idx) {
+PyObject *matrixColumn(PyObject *self, PyObject *args) {
 /*  Returns the ith column from the Matrix self.
 
     Inputs: self - The matrix to return the ith column from.
-            idx  - The column number to return from self.
+            args - A PyTuple containing a PyNumber of the index of the column to return.
 
     Outputs: A Vector object of the ith column in self if successful, NULL if an error occurs.
 */
 
-    unsigned long col = PyNumber_AS_UNSIGNED_LONG(idx),
-                  i;
+    long col,
+         i;
     Matrix *m = (Matrix *)self;
     Vector *v;
 
-    if (PyErr_Occurred())
+    if (!PyArg_ParseTuple(args, "l", &col))
         return NULL;
 
-    if (col >= m->columns) {
-        PyErr_Format(PyExc_IndexError, "Cannot return column number %lu of Matrix with %x columns.", col, m->columns);
+    if (col >= m->columns || col < 0) {
+        PyErr_Format(PyExc_IndexError, "Cannot return column number %ld of Matrix with %u columns.", col, m->columns);
         return NULL;
     }
 
@@ -379,7 +379,6 @@ PyObject *matrixFactorLU(PyObject *self) {
     Outputs: A PyTuple containing (L, U).
 */
 
-    PyObject *pyTuple;
     Matrix *l,
            *u,
            *m = (Matrix *)self;
@@ -397,15 +396,7 @@ PyObject *matrixFactorLU(PyObject *self) {
         return NULL;
     }
 
-    if ((pyTuple = PyTuple_New(2)) == NULL) {
-        Py_DECREF(l);
-        Py_DECREF(u);
-        return NULL;
-    }
-    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)l);
-    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)u);
-
-    return pyTuple;
+    return Py_BuildValue("NN", (PyObject *)l, (PyObject *)u);
 }
 
 
@@ -417,7 +408,6 @@ PyObject *matrixFactorLDU(PyObject *self) {
     Outputs: A PyTuple containing (L, D, U).
 */
 
-    PyObject *pyTuple;
     Matrix *l,
            *d,
            *u,
@@ -442,17 +432,7 @@ PyObject *matrixFactorLDU(PyObject *self) {
         return NULL;
     }
 
-    if ((pyTuple = PyTuple_New(3)) == NULL) {
-        Py_DECREF(l);
-        Py_DECREF(d);
-        Py_DECREF(u);
-        return NULL;
-    }
-    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)l);
-    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)d);
-    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)u);
-
-    return pyTuple;
+    return Py_BuildValue("NNN", (PyObject *)l, (PyObject *)d, (PyObject *)u);
 }
 
 
@@ -465,7 +445,6 @@ PyObject *matrixFactorPLU(PyObject *self) {
     Outputs: A PyTuple containing (P, L, U).
 */
 
-    PyObject *pyTuple;
     Matrix *p,
            *l,
            *u,
@@ -490,17 +469,7 @@ PyObject *matrixFactorPLU(PyObject *self) {
         return NULL;
     }
 
-    if ((pyTuple = PyTuple_New(3)) == NULL) {
-        Py_DECREF(l);
-        Py_DECREF(p);
-        Py_DECREF(u);
-        return NULL;
-    }
-    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)p);
-    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)l);
-    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)u);
-
-    return pyTuple;
+    return Py_BuildValue("NNN", (PyObject *)p, (PyObject *)l, (PyObject *)u);
 }
 
 
@@ -513,7 +482,6 @@ PyObject *matrixFactorPLDU(PyObject *self) {
     Outputs: A PyTuple containing (P, L, D, U).
 */
 
-    PyObject *pyTuple;
     Matrix *p,
            *l,
            *d,
@@ -546,19 +514,7 @@ PyObject *matrixFactorPLDU(PyObject *self) {
         return NULL;
     }
 
-    if ((pyTuple = PyTuple_New(4)) == NULL) {
-        Py_DECREF(p);
-        Py_DECREF(l);
-        Py_DECREF(d);
-        Py_DECREF(u);
-        return NULL;
-    }
-    PyTuple_SET_ITEM(pyTuple, 0, (PyObject *)p);
-    PyTuple_SET_ITEM(pyTuple, 1, (PyObject *)l);
-    PyTuple_SET_ITEM(pyTuple, 2, (PyObject *)d);
-    PyTuple_SET_ITEM(pyTuple, 3, (PyObject *)u);
-
-    return pyTuple;
+    return Py_BuildValue("NNNN", (PyObject *)p, (PyObject *)l, (PyObject *)d, (PyObject *)u);
 }
 
 

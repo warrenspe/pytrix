@@ -6,11 +6,7 @@ pyobject_del in deinits?
 
 use struct Vectors in matrices, not pyobjects
 
-move static function prototypes to top of .c file
-
 seven dimensional cross prod
-
-move all error messages of functions calling pynumber_as_long and pynumber_as_vector_type into those functions, use PyErr_Occurred in calling functions
 
 help() docstrings for functions, especially init
 
@@ -21,7 +17,3 @@ isuppertriangular
 islowertriangular
 
 partial pivoting in inverse alg
-
-identity, elim, perm matrix constructors - ie special matrix constructors
-
-pyargparse tuple where applicable; see if we can remove pynumber_as_unsigned_long util.c func

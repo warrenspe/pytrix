@@ -19,7 +19,8 @@
 #define __PYTRIX_H 1
 
     #define VECTOR_TYPE double
-    #define STRASSEN_CUTOFF 1000
+    #define STRASSEN_CUTOFF 32
+    #define MIN_STRASSEN_SIZE 32
 
     // Standard Library Includes
     #include <Python.h>

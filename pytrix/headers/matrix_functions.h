@@ -29,6 +29,7 @@ PyObject *matrixItem(PyObject *, Py_ssize_t);
 PyObject *matrixAdd(PyObject *, PyObject *);
 PyObject *matrixSub(PyObject *, PyObject *);
 PyObject *matrixMul(PyObject *, PyObject *);
+PyObject *matrixStrassenMul(PyObject *, PyObject *);
 PyObject *matrixNeg(PyObject *);
 int matrixTrue(Matrix *);
 PyObject *matrixRichCmp(PyObject *, PyObject *, int);
@@ -76,4 +77,4 @@ unsigned char _matrixPALDU(Matrix *, Matrix *, Matrix *, Matrix *, Matrix *, uns
 Matrix *_matrixInverse(Matrix *);
 
 // strassen.c
-Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *);
+Matrix *strassenWinogradMatrixMatrixMul(Matrix *, Matrix *, unsigned int);

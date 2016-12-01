@@ -454,8 +454,8 @@ Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
     }
 
     // Check if the Strassen-Winograd algorithm is applicable & would offer any benefit
-    if (a->rows == a->columns && b->rows == b->columns && a->rows == b->rows && a->rows * a->columns > STRASSEN_CUTOFF) {
-        return strassenWinogradMatrixMatrixMul(a, b);
+    if (a->rows == a->columns && b->rows == b->columns && a->rows == b->rows && a->rows * a->columns >= MIN_STRASSEN_SIZE) {
+        return strassenWinogradMatrixMatrixMul(a, b, STRASSEN_CUTOFF);
     }
 
     if ((outMatrix = _matrixNew(a->rows, b->columns)) == NULL)

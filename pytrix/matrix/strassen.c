@@ -55,12 +55,12 @@ typedef struct {
 
 // Function Prototypes
 static void _swMatrixPartInit(SWMatrixPart *, Matrix *, unsigned int, unsigned int, unsigned int, unsigned int);
-static unsigned int _getMinPadding(unsigned int);
+static unsigned int _getMinPadding(unsigned int, unsigned int);
 static Matrix *_padMatrix(Matrix *, unsigned int);
 static unsigned int _strassenMatrixAdd(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
 static unsigned int _strassenMatrixSub(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
 static unsigned int _strassenNaiveMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
-static unsigned int _strassenMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
+static unsigned int _strassenMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *, unsigned int);
 
 // Function Declarations
 static void _swMatrixPartInit(SWMatrixPart *s, Matrix *m, unsigned int rs, unsigned int re, unsigned int cs, unsigned int ce) {
@@ -73,17 +73,18 @@ static void _swMatrixPartInit(SWMatrixPart *s, Matrix *m, unsigned int rs, unsig
     s->mColEnd = ce;
 }
 
-static unsigned int _getMinPadding(unsigned int matrixSize) {
+static unsigned int _getMinPadding(unsigned int matrixSize, unsigned int cutoff) {
 /*  Determines the minimum amount of padding necessary to add to a given matrix in order to perform the
     Strassen-Winograd algorithm on it without requiring further pad operations.
 
     Inputs: matrixSize - The number of rows & columns in the matrix.
+            cutoff     - The Strassen Cutoff.  See the API function for details.
 
     Outputs: The size of the matrix we should pad to.
 */
 
     unsigned int cnt = 0;
-    while(matrixSize > STRASSEN_CUTOFF) {
+    while(matrixSize > cutoff) {
         matrixSize++;
         matrixSize >>= 1;
         cnt++;
@@ -197,9 +198,10 @@ static unsigned int _strassenNaiveMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SW
 }
 
 
-static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatrixPart *out) {
+static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatrixPart *out, unsigned int cutoff) {
     unsigned int halfSize,
-                 regularSize;
+                 regularSize,
+                 errored = 0;
 
     Matrix *x1 = NULL,
            *x2 = NULL,
@@ -221,10 +223,10 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
                  x3p;
 
     regularSize = SWM_RE(a) - SWM_RS(a);
-    halfSize = regularSize >>= 1;
+    halfSize = regularSize >> 1;
 
-    // If there's fewer than STRASSEN_CUTOFF elements in our matrices just use regular multiplication
-    if (regularSize <= STRASSEN_CUTOFF)
+    // If there's fewer than `cutoff` elements in our matrices just use regular multiplication
+    if (regularSize <= cutoff)
         return _strassenNaiveMatrixMul(a, b, out);
 
     // Initialize our temp matrices; 
@@ -237,46 +239,77 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
     }
 
     // Initialize our MatrixParts
-    _swMatrixPartInit(&a11, SWM_M(a), 0, halfSize, 0, halfSize);
-    _swMatrixPartInit(&a12, SWM_M(a), 0, halfSize, halfSize, regularSize);
-    _swMatrixPartInit(&a21, SWM_M(a), halfSize, regularSize, 0, halfSize);
-    _swMatrixPartInit(&a22, SWM_M(a), halfSize, regularSize, halfSize, regularSize);
-    _swMatrixPartInit(&b11, SWM_M(b), 0, halfSize, 0, halfSize);
-    _swMatrixPartInit(&b12, SWM_M(b), 0, halfSize, halfSize, regularSize);
-    _swMatrixPartInit(&b21, SWM_M(b), halfSize, regularSize, 0, halfSize);
-    _swMatrixPartInit(&b22, SWM_M(b), halfSize, regularSize, halfSize, regularSize);
+    _swMatrixPartInit(&a11, SWM_M(a), SWM_RS(a), SWM_RS(a) + halfSize, SWM_CS(a), SWM_CS(a) + halfSize);
+    _swMatrixPartInit(&a12, SWM_M(a), SWM_RS(a), SWM_RS(a) + halfSize, SWM_CS(a) + halfSize, SWM_CE(a));
+    _swMatrixPartInit(&a21, SWM_M(a), SWM_RS(a) + halfSize, SWM_RE(a), SWM_CS(a), SWM_CS(a) + halfSize);
+    _swMatrixPartInit(&a22, SWM_M(a), SWM_RS(a) + halfSize, SWM_RE(a), SWM_CS(a) + halfSize, SWM_CE(a));
+
+    _swMatrixPartInit(&b11, SWM_M(b), SWM_RS(b), SWM_RS(b) + halfSize, SWM_CS(b), SWM_CS(b) + halfSize);
+    _swMatrixPartInit(&b12, SWM_M(b), SWM_RS(b), SWM_RS(b) + halfSize, SWM_CS(b) + halfSize, SWM_CE(b));
+    _swMatrixPartInit(&b21, SWM_M(b), SWM_RS(b) + halfSize, SWM_RE(b), SWM_CS(b), SWM_CS(b) + halfSize);
+    _swMatrixPartInit(&b22, SWM_M(b), SWM_RS(b) + halfSize, SWM_RE(b), SWM_CS(b) + halfSize, SWM_CE(b));
+
     _swMatrixPartInit(&u1p, SWM_M(out), 0, halfSize, 0, halfSize);
     _swMatrixPartInit(&u5p, SWM_M(out), 0, halfSize, halfSize, regularSize);
     _swMatrixPartInit(&u6p, SWM_M(out), halfSize, regularSize, 0, halfSize);
     _swMatrixPartInit(&u7p, SWM_M(out), halfSize, regularSize, halfSize, regularSize);
+
+    _swMatrixPartInit(&u1p, SWM_M(out), SWM_RS(out), SWM_RS(out) + halfSize, SWM_CS(out), SWM_CS(out) + halfSize);
+    _swMatrixPartInit(&u5p, SWM_M(out), SWM_RS(out), SWM_RS(out) + halfSize, SWM_CS(out) + halfSize, SWM_CE(out));
+    _swMatrixPartInit(&u6p, SWM_M(out), SWM_RS(out) + halfSize, SWM_RE(out), SWM_CS(out), SWM_CS(out) + halfSize);
+    _swMatrixPartInit(&u7p, SWM_M(out), SWM_RS(out) + halfSize, SWM_RE(out), SWM_CS(out) + halfSize, SWM_CE(out));
+
     _swMatrixPartInit(&x1p, x1, 0, halfSize, 0, halfSize);
     _swMatrixPartInit(&x2p, x2, 0, halfSize, 0, halfSize);
     _swMatrixPartInit(&x3p, x3, 0, halfSize, 0, halfSize);
 
     // Perform Strassen-Winograd
-    if (_strassenMatrixSub(&b22, &b12, &u5p) || // T3
-        _strassenMatrixSub(&a11, &a21, &u1p) || // S3
-        _strassenMatrixSub(&b12, &b11, &u7p) || // T1
-        _strassenMatrixAdd(&a21, &a22, &x1p) || // S1
-        _strassenMatrixMul(&u1p, &u5p, &u6p) || // P7
-        _strassenMatrixMul(&x1p, &u7p, &u5p) || // P5
-        _strassenMatrixSub(&b22, &u7p, &u1p) || // T2
-        _strassenMatrixSub(&x1p, &a11, &u7p) || // S2
-        _strassenMatrixMul(&u7p, &u1p, &x1p) || // P6
-        _strassenMatrixMul(&a11, &b11, &x2p) || // P1
-        _strassenMatrixAdd(&x2p, &x1p, &x3p) || // U2
-        _strassenMatrixAdd(&x3p, &u6p, &x1p) || // U3
-        _strassenMatrixAdd(&x3p, &u5p, &u6p) || // U4
-        _strassenMatrixSub(&a12, &u7p, &x3p) || // S4
-        _strassenMatrixSub(&u1p, &b21, &u7p) || // T4
-        _strassenMatrixMul(&x3p, &b22, &u1p) || // P3
-        _strassenMatrixMul(&a22, &u7p, &x3p) || // P4
-        _strassenMatrixAdd(&x1p, &u5p, &u7p) || // U7
-        _strassenMatrixAdd(&u6p, &u1p, &u5p) || // U5
-        _strassenMatrixSub(&x1p, &x3p, &u6p) || // U6
-        _strassenMatrixMul(&a11, &b21, &x3p) || // P2
-        _strassenMatrixAdd(&x2p, &x3p, &u1p)) { // U1
+    if (_strassenMatrixSub(&b22, &b12, &u5p)) // T3
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&a11, &a21, &u1p)) // S3
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&b12, &b11, &u7p)) // T1
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&a21, &a22, &x1p)) // S1
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&u1p, &u5p, &u6p, cutoff)) // P7
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&x1p, &u7p, &u5p, cutoff)) // P5
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&b22, &u7p, &u1p)) // T2
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&x1p, &a11, &u7p)) // S2
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&u7p, &u1p, &x1p, cutoff)) // P6
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&a11, &b11, &x2p, cutoff)) // P1
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&x2p, &x1p, &x3p)) // U2
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&x3p, &u6p, &x1p)) // U3
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&x3p, &u5p, &u6p)) // U4
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&a12, &u7p, &x3p)) // S4
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&u1p, &b21, &u7p)) // T4
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&x3p, &b22, &u1p, cutoff)) // P3
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&a22, &u7p, &x3p, cutoff)) // P4
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&x1p, &u5p, &u7p)) // U7
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&u6p, &u1p, &u5p)) // U5
+        errored = 1;
+    if (!errored && _strassenMatrixSub(&x1p, &x3p, &u6p)) // U6
+        errored = 1;
+    if (!errored && _strassenMatrixMul(&a12, &b21, &x3p, cutoff)) // P2
+        errored = 1;
+    if (!errored && _strassenMatrixAdd(&x2p, &x3p, &u1p)) // U1
+        errored = 1;
 
+    if (errored) {
         Py_XDECREF(x1);
         Py_XDECREF(x2);
         Py_XDECREF(x3);
@@ -286,11 +319,13 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
     return 0;
 }
 
-Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b) {
+Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b, unsigned int cutoff) {
 /*  API function for the Strassen Winograd matrix multiplication algorithm.
 
-    Inputs: a - 
-            b - 
+    Inputs: a      - The first matrix to multiply.
+            b      - The second matrix to multiply.
+            cutoff - A value, which when the recursively calculated matrice's drops below, will be calculated using the
+                     naive O(n^3) algorithm.
 
     Outputs: A new Matrix initialized by performing a * b using the Strassen-Winograd algorithm.
              NULL if an exception occurrs.
@@ -299,7 +334,8 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b) {
     unsigned int padSize,
                  prePadSize,
                  padded = 0,
-                 result;
+                 result,
+                 i;
     Matrix *out;
     SWMatrixPart aPart,
                  bPart,
@@ -327,14 +363,14 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b) {
     // Check if our matrices need padding.  This is necessary because if, say, we were given a matrix of odd length we
     // would first need to add a row and column of 0's at the end so that it can be divided into two chunks.
     // Additionally, we want to ensure that we will only need to pad the matrix once, and be able to repeatedly divide
-    // it into smaller matrices until eventually we result with a matrix with a size smaller than STRASSEN_CUTOFF,
+    // it into smaller matrices until eventually we result with a matrix with a size smaller than `cutoff`,
     // (as naive O(n^3)matrix multiplication is faster for small matrices).  For example, if we stop strassen on
     // matrices of size 10 or less, and we're given a matrix of size 42, we want to pad it to 48.  This is because if
     // we were to work on a matrix of size 42, after 1 step we would have matrices of size 21, which would require
     // re-padding to 22, then we'd have matrices of size 11, which would have to be padded to 12, then finally after
     // two paddings we would have matrices small enough to perform O(n^3) multiplication.  By padding to 48 once we
     // divide to 24, then 12, then 6 without having to re-pad.
-    padSize = _getMinPadding(a->rows);
+    padSize = _getMinPadding(a->rows, cutoff);
     prePadSize = a->rows;
     if (a->rows != padSize) {
         padded = 1;
@@ -358,7 +394,7 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b) {
     _swMatrixPartInit(&bPart, b, 0, b->rows, 0, b->columns);
     _swMatrixPartInit(&outPart, out, 0, b->rows, 0, b->columns);
 
-    result = _strassenMatrixMul(&aPart, &bPart, &outPart);
+    result = _strassenMatrixMul(&aPart, &bPart, &outPart, cutoff);
 
     // If we created padded matrices, release them
     if (padded) {
@@ -373,8 +409,15 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b) {
     }
 
     // Otherwise, update our matrix to remove any unnecessary padding
+    // Free any unnecessary padding rows.  Don't worry about columns because those will be free'd with their row
+    for (i = prePadSize; i < out->rows; i++)
+        Py_DECREF(Matrix_GetVector(out, i));
+    // Update the size of the matrix
     out->rows = prePadSize;
     out->columns = prePadSize;
+    // Update the size of each of the vectors in the matrix
+    for (i = 0; i < out->rows; i++)
+        Matrix_GetVector(out, i)->dimensions = out->columns;
 
     return out;
 }

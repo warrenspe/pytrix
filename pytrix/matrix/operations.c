@@ -182,6 +182,37 @@ PyObject *matrixMul(PyObject *a, PyObject *b) {
 }
 
 
+PyObject *matrixStrassenMul(PyObject *self, PyObject *args) {
+/*  Multiplies a matrix by another matrix using strassens multiplications regardless of the size (assuming their sizes
+    are at least 2x2).
+
+    Inputs: self - The matrix the function was called on, the first to multiply with.
+            args - A PyTuple containing the second matrix to multiply with and the strassen cutoff point.
+
+    Outputs: A new Matrix object calculated by performing a * b, or NULL if an error occurs.
+*/
+
+    PyObject *otherMatrix;
+    int minCutoff;
+
+    if (!PyArg_ParseTuple(args, "Oi", &otherMatrix, &minCutoff))
+        return NULL;
+
+    if (!Matrix_Check(otherMatrix)) {
+        PyErr_Format(PyExc_TypeError,
+                     "Matrix.strassenMul must be appled to another Matrix, not: \"%.400s\"", Py_TYPE(otherMatrix)->tp_name);
+        return NULL;
+    }
+
+    if (minCutoff < 2) {
+        PyErr_Format(PyExc_ValueError, "minCutoff argument to Matrix.strassenMul cannot be less than 2: %i", minCutoff);
+        return NULL;
+    }
+
+    return (PyObject *)strassenWinogradMatrixMatrixMul((Matrix *)self, (Matrix *)otherMatrix, (unsigned int)minCutoff);
+}
+
+
 PyObject *matrixNeg(PyObject *a) {
 /*  Negates the components in a matrix.
 

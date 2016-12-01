@@ -60,7 +60,7 @@ static Matrix *_padMatrix(Matrix *, unsigned int);
 static unsigned int _strassenMatrixAdd(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
 static unsigned int _strassenMatrixSub(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
 static unsigned int _strassenNaiveMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *);
-static unsigned int _strassenMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *, unsigned int);
+static unsigned int _strassenMatrixMul(SWMatrixPart *, SWMatrixPart *, SWMatrixPart *, SWMatrixPart *, unsigned int);
 
 // Function Declarations
 static void _swMatrixPartInit(SWMatrixPart *s, Matrix *m, unsigned int rs, unsigned int re, unsigned int cs, unsigned int ce) {
@@ -198,14 +198,12 @@ static unsigned int _strassenNaiveMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SW
 }
 
 
-static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatrixPart *out, unsigned int cutoff) {
+static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatrixPart *out, SWMatrixPart *x,
+                                       unsigned int cutoff) {
     unsigned int halfSize,
                  regularSize,
                  errored = 0;
 
-    Matrix *x1 = NULL,
-           *x2 = NULL,
-           *x3 = NULL;
     SWMatrixPart a11,
                  a12,
                  a21,
@@ -218,9 +216,10 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
                  u5p,
                  u6p,
                  u7p,
-                 x1p,
-                 x2p,
-                 x3p;
+                 x11,
+                 x12,
+                 x21,
+                 x22;
 
     regularSize = SWM_RE(a) - SWM_RS(a);
     halfSize = regularSize >> 1;
@@ -228,15 +227,6 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
     // If there's fewer than `cutoff` elements in our matrices just use regular multiplication
     if (regularSize <= cutoff)
         return _strassenNaiveMatrixMul(a, b, out);
-
-    // Initialize our temp matrices; 
-    if (((x1 = _matrixNew(halfSize, halfSize)) == NULL) || ((x2 = _matrixNew(halfSize, halfSize)) == NULL) ||
-                                                           ((x3 = _matrixNew(halfSize, halfSize)) == NULL)) {
-        Py_XDECREF(x1);
-        Py_XDECREF(x2);
-        Py_XDECREF(x3);
-        return 1;
-    }
 
     // Initialize our MatrixParts
     _swMatrixPartInit(&a11, SWM_M(a), SWM_RS(a), SWM_RS(a) + halfSize, SWM_CS(a), SWM_CS(a) + halfSize);
@@ -249,72 +239,61 @@ static unsigned int _strassenMatrixMul(SWMatrixPart *a, SWMatrixPart *b, SWMatri
     _swMatrixPartInit(&b21, SWM_M(b), SWM_RS(b) + halfSize, SWM_RE(b), SWM_CS(b), SWM_CS(b) + halfSize);
     _swMatrixPartInit(&b22, SWM_M(b), SWM_RS(b) + halfSize, SWM_RE(b), SWM_CS(b) + halfSize, SWM_CE(b));
 
-    _swMatrixPartInit(&u1p, SWM_M(out), 0, halfSize, 0, halfSize);
-    _swMatrixPartInit(&u5p, SWM_M(out), 0, halfSize, halfSize, regularSize);
-    _swMatrixPartInit(&u6p, SWM_M(out), halfSize, regularSize, 0, halfSize);
-    _swMatrixPartInit(&u7p, SWM_M(out), halfSize, regularSize, halfSize, regularSize);
-
     _swMatrixPartInit(&u1p, SWM_M(out), SWM_RS(out), SWM_RS(out) + halfSize, SWM_CS(out), SWM_CS(out) + halfSize);
     _swMatrixPartInit(&u5p, SWM_M(out), SWM_RS(out), SWM_RS(out) + halfSize, SWM_CS(out) + halfSize, SWM_CE(out));
     _swMatrixPartInit(&u6p, SWM_M(out), SWM_RS(out) + halfSize, SWM_RE(out), SWM_CS(out), SWM_CS(out) + halfSize);
     _swMatrixPartInit(&u7p, SWM_M(out), SWM_RS(out) + halfSize, SWM_RE(out), SWM_CS(out) + halfSize, SWM_CE(out));
 
-    _swMatrixPartInit(&x1p, x1, 0, halfSize, 0, halfSize);
-    _swMatrixPartInit(&x2p, x2, 0, halfSize, 0, halfSize);
-    _swMatrixPartInit(&x3p, x3, 0, halfSize, 0, halfSize);
+    _swMatrixPartInit(&x11, SWM_M(x), SWM_RS(x), SWM_RS(x) + halfSize, SWM_CS(x), SWM_CS(x) + halfSize);
+    _swMatrixPartInit(&x12, SWM_M(x), SWM_RS(x), SWM_RS(x) + halfSize, SWM_CS(x) + halfSize, SWM_CE(x));
+    _swMatrixPartInit(&x21, SWM_M(x), SWM_RS(x) + halfSize, SWM_RE(x), SWM_CS(x), SWM_CS(x) + halfSize);
+    _swMatrixPartInit(&x22, SWM_M(x), SWM_RS(x) + halfSize, SWM_RE(x), SWM_CS(x) + halfSize, SWM_CE(x));
 
     // Perform Strassen-Winograd
     if (_strassenMatrixSub(&b22, &b12, &u5p)) // T3
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&a11, &a21, &u1p)) // S3
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&b12, &b11, &u7p)) // T1
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&a21, &a22, &x1p)) // S1
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&u1p, &u5p, &u6p, cutoff)) // P7
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&x1p, &u7p, &u5p, cutoff)) // P5
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&b22, &u7p, &u1p)) // T2
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&x1p, &a11, &u7p)) // S2
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&u7p, &u1p, &x1p, cutoff)) // P6
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&a11, &b11, &x2p, cutoff)) // P1
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&x2p, &x1p, &x3p)) // U2
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&x3p, &u6p, &x1p)) // U3
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&x3p, &u5p, &u6p)) // U4
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&a12, &u7p, &x3p)) // S4
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&u1p, &b21, &u7p)) // T4
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&x3p, &b22, &u1p, cutoff)) // P3
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&a22, &u7p, &x3p, cutoff)) // P4
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&x1p, &u5p, &u7p)) // U7
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&u6p, &u1p, &u5p)) // U5
-        errored = 1;
-    if (!errored && _strassenMatrixSub(&x1p, &x3p, &u6p)) // U6
-        errored = 1;
-    if (!errored && _strassenMatrixMul(&a12, &b21, &x3p, cutoff)) // P2
-        errored = 1;
-    if (!errored && _strassenMatrixAdd(&x2p, &x3p, &u1p)) // U1
-        errored = 1;
-
-    if (errored) {
-        Py_XDECREF(x1);
-        Py_XDECREF(x2);
-        Py_XDECREF(x3);
         return 1;
-    }
+    if (!errored && _strassenMatrixSub(&a11, &a21, &u1p)) // S3
+        return 1;
+    if (!errored && _strassenMatrixSub(&b12, &b11, &u7p)) // T1
+        return 1;
+    if (!errored && _strassenMatrixAdd(&a21, &a22, &x11)) // S1
+        return 1;
+    if (!errored && _strassenMatrixMul(&u1p, &u5p, &u6p, &x22, cutoff)) // P7
+        return 1;
+    if (!errored && _strassenMatrixMul(&x11, &u7p, &u5p, &x22, cutoff)) // P5
+        return 1;
+    if (!errored && _strassenMatrixSub(&b22, &u7p, &u1p)) // T2
+        return 1;
+    if (!errored && _strassenMatrixSub(&x11, &a11, &u7p)) // S2
+        return 1;
+    if (!errored && _strassenMatrixMul(&u7p, &u1p, &x11, &x22, cutoff)) // P6
+        return 1;
+    if (!errored && _strassenMatrixMul(&a11, &b11, &x12, &x22, cutoff)) // P1
+        return 1;
+    if (!errored && _strassenMatrixAdd(&x12, &x11, &x21)) // U2
+        return 1;
+    if (!errored && _strassenMatrixAdd(&x21, &u6p, &x11)) // U3
+        return 1;
+    if (!errored && _strassenMatrixAdd(&x21, &u5p, &u6p)) // U4
+        return 1;
+    if (!errored && _strassenMatrixSub(&a12, &u7p, &x21)) // S4
+        return 1;
+    if (!errored && _strassenMatrixSub(&u1p, &b21, &u7p)) // T4
+        return 1;
+    if (!errored && _strassenMatrixMul(&x21, &b22, &u1p, &x22, cutoff)) // P3
+        return 1;
+    if (!errored && _strassenMatrixMul(&a22, &u7p, &x21, &x22, cutoff)) // P4
+        return 1;
+    if (!errored && _strassenMatrixAdd(&x11, &u5p, &u7p)) // U7
+        return 1;
+    if (!errored && _strassenMatrixAdd(&u6p, &u1p, &u5p)) // U5
+        return 1;
+    if (!errored && _strassenMatrixSub(&x11, &x21, &u6p)) // U6
+        return 1;
+    if (!errored && _strassenMatrixMul(&a12, &b21, &x21, &x22, cutoff)) // P2
+        return 1;
+    if (!errored && _strassenMatrixAdd(&x12, &x21, &u1p)) // U1
+        return 1;
 
     return 0;
 }
@@ -336,23 +315,21 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b, unsigned int cutof
                  padded = 0,
                  result,
                  i;
-    Matrix *out;
+    Matrix *out,
+           *x;
     SWMatrixPart aPart,
                  bPart,
-                 outPart;
+                 outPart,
+                 xPart;
 
     // Validate that our input matrices are the same size and square.  This is the only case when we can apply
     // Strassen-Winograd
     if (a->rows != a->columns || b->rows != b->columns) {
-        if (b->rows != a->rows) {
-            PyErr_SetString(PyExc_ValueError, "Cannot perform Strassen-Winograd on non-square matrices.");
-            return NULL;
-        }
-    } else {
-        if (b->rows != a->rows) {
-            PyErr_SetString(PyExc_ValueError, "Cannot perform Strassen-Winograd on matrices of different sizes");
-            return NULL;
-        }
+        PyErr_SetString(PyExc_ValueError, "Cannot perform Strassen-Winograd on non-square matrices.");
+        return NULL;
+    } else if (b->rows != a->rows) {
+        PyErr_SetString(PyExc_ValueError, "Cannot perform Strassen-Winograd on matrices of different sizes");
+        return NULL;
     }
     // Assert we are at least 2 rows/columns wide
     if (a->rows == 0 || a->rows == 1) {
@@ -390,17 +367,29 @@ Matrix *strassenWinogradMatrixMatrixMul(Matrix *a, Matrix *b, unsigned int cutof
         return NULL;
     }
 
+    // Initialize our temp matrix
+    if ((x = _matrixNew(out->rows, out->columns)) == NULL) {
+        Py_DECREF(a);
+        Py_DECREF(b);
+        Py_DECREF(out);
+        return NULL;
+    }
+
     _swMatrixPartInit(&aPart, a, 0, a->rows, 0, a->columns);
     _swMatrixPartInit(&bPart, b, 0, b->rows, 0, b->columns);
-    _swMatrixPartInit(&outPart, out, 0, b->rows, 0, b->columns);
+    _swMatrixPartInit(&outPart, out, 0, out->rows, 0, out->columns);
+    _swMatrixPartInit(&xPart, x, 0, x->rows, 0, x->columns);
 
-    result = _strassenMatrixMul(&aPart, &bPart, &outPart, cutoff);
+    result = _strassenMatrixMul(&aPart, &bPart, &outPart, &xPart, cutoff);
 
     // If we created padded matrices, release them
     if (padded) {
         Py_DECREF(a);
         Py_DECREF(b);
     }
+
+    // Release our temp matrix
+    Py_DECREF(x);
 
     // If our algorithm was unsuccessful release the return matrix and return NULL
     if (result) {

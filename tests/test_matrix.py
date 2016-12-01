@@ -578,3 +578,42 @@ class TestMatrix(tests.PytrixTestCase):
                 # Otherwise it is NOT the identity matrix
                 p, _, _, _ = m.factorPLDU()
                 self.assertFalse(p.isIdentity())
+
+    def testStrassenMultiplication(self):
+        c2Matrix = pytrix.Matrix([1, 2, 3], [4, 5, 6])
+        # Todo test passing a non-2, <2, >size value to _strassenMul, non number, neg number
+        # todo test passing other non matrices to strassen and naive muls
+        # todo test passing non-square matrices to strassen
+        # todo test passing non-equal size matrices to strassen
+        # ^ above 2 ensure work on naive
+
+        self.assertRaises(ValueError, self.m1._strassenMul, self.m1, 0)
+        self.assertRaises(ValueError, self.m1._strassenMul, self.m1, -2)
+        self.assertRaises(TypeError, self.m1._strassenMul, self.m1, .5)
+        self.assertRaises(ValueError, self.m1._strassenMul, self.m1, 1)
+        self.assertRaises(TypeError, self.m1._strassenMul, self.m1, "1")
+        self.assertRaises(ValueError, self.m1._strassenMul, self.m1, True)
+        self.assertEqual(self.m1._strassenMul(self.m1, 5).rows, 3)
+
+        self.assertRaises(TypeError, self.m1._strassenMul, [1, 2, 3], 2)
+        self.assertRaises(TypeError, self.m1._strassenMul, None,  2)
+        self.assertRaises(TypeError, self.m1._strassenMul, pytrix.Vector([1, 2, 3]), 2)
+        self.assertRaises(TypeError, self.m1._naiveMul, [1, 2, 3])
+        self.assertRaises(TypeError, self.m1._naiveMul, None)
+        self.assertRaises(TypeError, self.m1._naiveMul, pytrix.Vector([1, 2, 3]))
+        self.assertRaises(ValueError, self.m1._strassenMul, c2Matrix, 2)
+        self.assertRaises(ValueError, c2Matrix._strassenMul, self.m1,  2)
+        self.assertEqual(c2Matrix._naiveMul(self.m1).rows, c2Matrix.rows)
+        self.assertRaises(ValueError, self.m1._naiveMul, c2Matrix)
+        self.assertRaises(ValueError, self.zero1._strassenMul, self.zero2, 2)
+        self.assertRaises(ValueError, self.zero2._strassenMul, self.zero3, 2)
+
+        for size in (2, 4, 8, 11, 14, 15, 16, 17, 32, 33, 45, 51):
+            m = pytrix.Matrix([range((s * size), (s * size) + size) for s in range(size)])
+            nm = m._naiveMul(m)
+            sm2 = m._strassenMul(m, 2)
+            sm4 = m._strassenMul(m, 4)
+            sm8 = m._strassenMul(m, 8)
+            self.assertEqual(nm, sm2)
+            self.assertEqual(sm2, sm4)
+            self.assertEqual(sm4, sm8)

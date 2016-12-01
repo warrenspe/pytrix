@@ -168,7 +168,7 @@ PyObject *matrixMul(PyObject *a, PyObject *b) {
 
     // Otherwise if both our operands are matrices, perform matrix multiplication
     if (Matrix_Check(a) && Matrix_Check(b))
-        return (PyObject *)_matrixMatrixMul((Matrix *)a, (Matrix *)b);
+        return (PyObject *)_matrixMatrixMul((Matrix *)a, (Matrix *)b, 1);
 
     // Otherwise, raise an exception. One of our operands will be a matrix, we are assured that by the fact that we
     // were called; figure out which one isn't for the error message.
@@ -200,7 +200,7 @@ PyObject *matrixStrassenMul(PyObject *self, PyObject *args) {
 
     if (!Matrix_Check(otherMatrix)) {
         PyErr_Format(PyExc_TypeError,
-                     "Matrix.strassenMul must be appled to another Matrix, not: \"%.400s\"", Py_TYPE(otherMatrix)->tp_name);
+                     "Matrix._strassenMul must be appled to another Matrix, not: \"%.400s\"", Py_TYPE(otherMatrix)->tp_name);
         return NULL;
     }
 
@@ -210,6 +210,27 @@ PyObject *matrixStrassenMul(PyObject *self, PyObject *args) {
     }
 
     return (PyObject *)strassenWinogradMatrixMatrixMul((Matrix *)self, (Matrix *)otherMatrix, (unsigned int)minCutoff);
+}
+
+
+PyObject *matrixNaiveMul(PyObject *self, PyObject *other) {
+/*  Multiplies a matrix by another matrix using Naive matrix multiplications regardless of their sizes
+
+    Inputs: self  - The matrix the function was called on, the first to multiply with.
+            other - Presumably the second matrix to multiply this matrix with using the naive algorithm.
+
+    Outputs: A new Matrix object calculated by performing a * b, or NULL if an error occurs.
+*/
+
+    PyObject *otherMatrix;
+
+    if (!Matrix_Check(other)) {
+        PyErr_Format(PyExc_TypeError,
+                     "Matrix._naiveMul must be appled to another Matrix, not: \"%.400s\"", Py_TYPE(other)->tp_name);
+        return NULL;
+    }
+
+    return (PyObject *)_matrixMatrixMul((Matrix *)self, (Matrix *)other, 0);
 }
 
 

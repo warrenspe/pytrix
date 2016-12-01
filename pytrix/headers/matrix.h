@@ -89,6 +89,9 @@ static PyMethodDef MatrixMethods[] = {
         PyDoc_STR("Multiplies this matrix with another matrix using the Strassen-Winograd algorithm. Requires that the "
                   "second argument be an integer, which will be used to stop the recursive Strassen algorithm, and use "
                   "the naive O(n^3) algorithm to process the final recursive matrices")},
+    {"_naiveMul", (PyCFunction)matrixNaiveMul, METH_O,
+        PyDoc_STR("Multiplies this matrix with another matrix using the Naive matrix multiplication algorithm. Will "
+                  "not use the Strassen-Winograd algorithm regardless of the matrix sizes.")},
     {"gaussianElim", (PyCFunction)matrixGaussianElim, METH_NOARGS,
         PyDoc_STR("Performs Gaussian elimination on this Matrix to convert it into upper triangular form.")},
     {"factorLU", (PyCFunction)matrixFactorLU, METH_NOARGS,

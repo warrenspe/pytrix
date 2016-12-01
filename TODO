@@ -20,10 +20,4 @@ partial pivoting in inverse alg
 POINT CLASS
 DOCUMENTATION
 
-CAN'T USE OUT AS A TEMP BUFFER. ONLY A FINAL SOLUTION :( - MAKE 4 NEW TEMP BUFFERS IE 1 NEW REGULAR SIZED BUFFER SPLIT INTO 4
-
-script to determine ideal strassen size
-
-smart padding add/sub - don't do extra work comparing 0's - but before this, strassen unit tests
-
-see about iterative strassen algorith, conserve memory
+smart padding add/sub - don't do extra work comparing 0's

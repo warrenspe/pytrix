@@ -437,11 +437,13 @@ unsigned char _inplaceMatrixMatrixMul(Matrix *left, Matrix *right, Matrix *out) 
 }
 
 
-Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
+Matrix *_matrixMatrixMul(Matrix *a, Matrix *b, unsigned char checkStrassen) {
 /*  Multiplies a matrix by another matrix.
 
-    Inputs: a - The first matrix to be multiplied.
-            b - The second matrix to be multiplied.
+    Inputs: a             - The first matrix to be multiplied.
+            b             - The second matrix to be multiplied.
+            checkStrassen - A boolean depicting whether or not we should check if using the Strassen-Winograd algorithm
+                            could offer any speed benefit.
 
     Outputs: A new matrix constructed by performing a * b, or NULL if an error occurred.
 */
@@ -454,7 +456,7 @@ Matrix *_matrixMatrixMul(Matrix *a, Matrix *b) {
     }
 
     // Check if the Strassen-Winograd algorithm is applicable & would offer any benefit
-    if (a->rows == a->columns && b->rows == b->columns && a->rows == b->rows && a->rows * a->columns >= MIN_STRASSEN_SIZE) {
+    if (checkStrassen && a->rows == a->columns && b->rows == b->columns && a->rows == b->rows && a->rows >= MIN_STRASSEN_SIZE) {
         return strassenWinogradMatrixMatrixMul(a, b, STRASSEN_CUTOFF);
     }
 

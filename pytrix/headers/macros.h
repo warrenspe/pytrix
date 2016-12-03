@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Point Macros
+#define Point_Check(op) (Py_TYPE(op) == &PointType)
+#define Point_GetValue(point, idx) (*((point->data) + idx))
+#define Point_SetValue(point, idx, val) Point_GetValue(point, idx) = val
+
+
 // Vector Macros
 #define Vector_Check(op) (Py_TYPE(op) == &VectorType)
 #define Vector_GetValue(vector, idx) (*((vector->data) + idx))

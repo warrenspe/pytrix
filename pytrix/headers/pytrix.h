@@ -35,6 +35,20 @@
         unsigned int dimensions;
         VECTOR_TYPE *data;
 
+    } Point;
+
+    typedef struct {
+        PyObject_HEAD
+        unsigned int i;
+        PyObject *iterating;
+
+    } PointIter;
+
+    typedef struct {
+        PyObject_HEAD
+        unsigned int dimensions;
+        VECTOR_TYPE *data;
+
     } Vector;
 
     typedef struct {
@@ -68,16 +82,26 @@
     #include "utils.c"
 
     // Function Definition Includes
+    #include "headers/point_functions.h"
+    #include "headers/point_iter_functions.h"
     #include "headers/vector_functions.h"
     #include "headers/vector_iter_functions.h"
     #include "headers/matrix_functions.h"
     #include "headers/matrix_iter_functions.h"
 
     // Type Includes
+    #include "headers/point_iter.h"
     #include "headers/vector_iter.h"
     #include "headers/matrix_iter.h"
+    #include "headers/point.h"
     #include "headers/vector.h"
     #include "headers/matrix.h"
+
+    // Point Function Includes
+    #include "point/init.c"
+    #include "point/iter.c"
+    #include "point/utils.c"
+    #include "point/operations.c"
 
     // Vector Function Includes
     #include "vector/init.c"

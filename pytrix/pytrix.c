@@ -1,5 +1,5 @@
 /*
- *  pytrix.c: A module used to construct and interact with matrices & vectors.
+ *  pytrix.c: A module used to construct and interact with matrices vectors, & points.
  *  Copyright (C) 2016 Warren Spencer warrenspencer27@gmail.com
 
  *  This program is free software: you can redistribute it and/or modify
@@ -24,16 +24,26 @@ void initTypes(PyObject *module) {
  * Inputs: module - The module object we will attach the types to.
  */
 
+    if (PyType_Ready(&PointType) < 0)
+        return;
+    if (PyType_Ready(&PointIterType) < 0)
+        return;
     if (PyType_Ready(&VectorType) < 0)
         return;
     if (PyType_Ready(&VectorIterType) < 0)
         return;
     if (PyType_Ready(&MatrixType) < 0)
         return;
+    if (PyType_Ready(&MatrixIterType) < 0)
+        return;
 
+    Py_INCREF(&PointType);
+    Py_INCREF(&PointIterType);
     Py_INCREF(&VectorType);
     Py_INCREF(&VectorIterType);
     Py_INCREF(&MatrixType);
+    Py_INCREF(&MatrixIterType);
+    PyModule_AddObject(module, "Point", (PyObject *)&PointType);
     PyModule_AddObject(module, "Vector", (PyObject *)&VectorType);
     PyModule_AddObject(module, "Matrix", (PyObject *)&MatrixType);
 }

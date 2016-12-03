@@ -222,8 +222,6 @@ PyObject *matrixNaiveMul(PyObject *self, PyObject *other) {
     Outputs: A new Matrix object calculated by performing a * b, or NULL if an error occurs.
 */
 
-    PyObject *otherMatrix;
-
     if (!Matrix_Check(other)) {
         PyErr_Format(PyExc_TypeError,
                      "Matrix._naiveMul must be appled to another Matrix, not: \"%.400s\"", Py_TYPE(other)->tp_name);

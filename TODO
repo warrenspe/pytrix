@@ -21,3 +21,7 @@ POINT CLASS
 DOCUMENTATION
 
 smart padding add/sub - don't do extra work comparing 0's
+
+add point stuff to unit tests for matrix/vector
+
+point unit tests

@@ -64,6 +64,7 @@ unsigned char _matricesEqual(Matrix *, Matrix *);
 Matrix *_matrixAdd(Matrix *, Matrix *);
 Matrix *_matrixSub(Matrix *, Matrix *);
 Matrix *_scalarMatrixMul(Matrix *, VECTOR_TYPE);
+Point *_pointMatrixMul(PyObject *, PyObject *);
 Vector *_vectorMatrixMul(PyObject *, PyObject *);
 unsigned char _inplaceMatrixMatrixMul(Matrix *, Matrix *, Matrix *);
 Matrix *_matrixMatrixMul(Matrix *, Matrix *, unsigned char);

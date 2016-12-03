@@ -73,7 +73,7 @@ Vector *_vectorCopy(Vector *v) {
 
 
 unsigned char _assertVectorDimensionsEqual(Vector *a, Vector *b) {
-/*  Asserts that two vectors are equal.  Sets a PyError if they are not.
+/*  Asserts that two vectors dimensions are equal.  Sets a PyError if they are not.
 
     Inputs: a - A pointer to the first Vector.
             b - A pointer to the second Vector.
@@ -259,7 +259,7 @@ Vector *_vectorDiv(Vector *self, VECTOR_TYPE divisor) {
     unsigned int i;
 
     if (divisor == 0) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "Division by zero vector.");
+        PyErr_SetString(PyExc_ZeroDivisionError, "Vector division by zero.");
         return NULL;
     }
 

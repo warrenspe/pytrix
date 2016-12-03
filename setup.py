@@ -13,7 +13,7 @@ if "DEBUG" in os.environ:
 distutils.core.setup(
     name=NAME,
     version=VERSION,
-    description="A built-in object serialization utility.",
+    description="A class allowing operations to be performed on Matrix, Vector & Point objects.",
     author="Warren Spencer",
     author_email="warrenspencer27@gmail.com",
     url="https://github.com/warrenspe/%s" % NAME,

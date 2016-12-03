@@ -39,7 +39,8 @@ unsigned char _assertPoint(PyObject *);
 
 PyObject *_pointToTuple(Point *);
 Point *_pointAdd(Point *, Vector *);
-Point *_pointSub(Point *, Vector *);
+Point *_pointVectorSub(Point *, Vector *);
+Vector *_pointPointSub(Point *, Point *);
 Point *_pointNeg(Point *);
 unsigned char _pointsEqual(Point *, Point *);
 

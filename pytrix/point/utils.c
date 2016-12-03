@@ -181,7 +181,7 @@ Point *_pointAdd(Point *a, Vector *b) {
 }
 
 
-Point *_pointSub(Point *a, Vector *b) {
+Point *_pointVectorSub(Point *a, Vector *b) {
 /*  Subtracts the components of a point from a vector to construct a new point.
 
     Inputs: a - The point to subtract from.
@@ -201,6 +201,31 @@ Point *_pointSub(Point *a, Vector *b) {
 
     for (i = 0; i < difference->dimensions; i++)
         Point_SetValue(difference, i, Point_GetValue(a, i) - Vector_GetValue(b, i));
+
+    return difference;
+}
+
+
+Vector *_pointPointSub(Point *a, Point *b) {
+/*  Calculates a Vector which maps point A to point B.
+
+    Inputs: a - The point to start from.
+            b - The point to end up at.
+
+    Outputs: A new Vector constructed by performing a - b, or NULL if an error occurred.
+*/
+
+    Vector *difference;
+    unsigned int i;
+
+    if (!_assertPointDimensionsEqual(a, b))
+        return NULL;
+
+    if ((difference = _vectorNew(a->dimensions)) == NULL)
+        return NULL;
+
+    for (i = 0; i < difference->dimensions; i++)
+        Vector_SetValue(difference, i, Point_GetValue(a, i) - Point_GetValue(b, i));
 
     return difference;
 }

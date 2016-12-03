@@ -43,11 +43,17 @@ class TestPoint(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: self.v3 + self.p2)
 
     def testPointSub(self):
-        # Test typical point subtractions
+        # Test point - vector subtractions
         self.assertEqual(self.p0 - self.v0, self.p0)
         self.assertEqual(self.p1 - self.v1, pytrix.Point(0))
         self.assertEqual(self.p2 - self.v2, pytrix.Point(0, 0))
         self.assertEqual(self.p3 - self.v3, pytrix.Point(0, 0, 0))
+
+        # Test point - point subtractions
+        self.assertEqual(self.p0 - self.p0, self.v0)
+        self.assertEqual(self.p1 - self.p1, pytrix.Vector(0))
+        self.assertEqual(self.p2 - self.p2, pytrix.Vector(0, 0))
+        self.assertEqual(self.p3 - self.p3, pytrix.Vector(0, 0, 0))
 
         # Test erroneous point subtractions
         self.assertRaises(TypeError, lambda *x: self.v0 - self.p0)
@@ -56,6 +62,7 @@ class TestPoint(tests.PytrixTestCase):
         self.assertRaises(TypeError, lambda *x: self.p1 - 1)
         self.assertRaises(TypeError, lambda *x: [] - self.p1)
         self.assertRaises(TypeError, lambda *x: self.p1 - [])
+        self.assertRaises(ValueError, lambda *x: self.p3 - self.p2)
 
     def testPointMul(self):
         # Assert that multiplication is not a valid operation on points

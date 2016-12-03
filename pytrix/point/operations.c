@@ -74,21 +74,28 @@ PyObject *pointAdd(PyObject *a, PyObject *b) {
 
 
 PyObject *pointSub(PyObject *a, PyObject *b) {
-/*  Subtracts the components of a vector from a point to create a new third point.
+/*  Subtracts the components of a vector from a point to create a new third point. Alternatively, takes two points
+    and constructs a vector which maps from the first to the second.
     Note that both arguments must be sanitized, as any Python object may be passed in either slot.
 
     Inputs: a - Supposedly the point to be subtracted from b.
-            b - Supposedly the vector to subtract from a.
+            b - Supposedly the vector or another point to subtract from a.
 
-    Outputs: A new point constructed by performing a - b, or NULL if an exception occurred.
+    Outputs: If one of a, b is a vector: A new point constructed by performing a - b, or NULL if an exception occurred.
+             If a & b are points: A new vector constructed by performing a - b, or NULL if an exception occurred.
 */
 
-    if (!(Point_Check(a) && Vector_Check(b))) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+    if (Point_Check(a)) {
+        if (Vector_Check(b)) {
+            return (PyObject *)_pointVectorSub((Point *)a, (Vector *)b);
+
+        } else if (Point_Check(b)) {
+            return (PyObject *)_pointPointSub((Point *)a, (Point *)b);
+        }
     }
 
-    return (PyObject *)_pointSub((Point *)a, (Vector *)b);
+    Py_INCREF(Py_NotImplemented);
+    return Py_NotImplemented;
 }
 
 

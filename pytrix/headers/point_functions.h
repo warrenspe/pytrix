@@ -24,8 +24,6 @@ PyObject *pointStr(Point *);
 PyObject *pointCopy(Point *);
 PyObject *pointAdd(PyObject *, PyObject *);
 PyObject *pointSub(PyObject *, PyObject *);
-PyObject *pointMul(PyObject *, PyObject *);
-PyObject *pointDiv(PyObject *, PyObject *);
 PyObject *pointNeg(Point *);
 PyObject *pointRichCmp(PyObject *, PyObject *, int);
 int pointTrue(Point *);
@@ -42,8 +40,6 @@ unsigned char _assertPoint(PyObject *);
 PyObject *_pointToTuple(Point *);
 Point *_pointAdd(Point *, Vector *);
 Point *_pointSub(Point *, Vector *);
-Point *_pointMul(Point *, VECTOR_TYPE);
-Point *_pointDiv(Point *, VECTOR_TYPE);
 Point *_pointNeg(Point *);
 unsigned char _pointsEqual(Point *, Point *);
 

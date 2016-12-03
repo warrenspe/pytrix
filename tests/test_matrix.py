@@ -11,6 +11,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.zero3 = pytrix.Matrix([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
         self.m1 = pytrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         self.m2 = pytrix.Matrix([[9, 8, 7], [6, 5, 4], [3, 2, 1]])
+        self.p = pytrix.Point(1, 2, 3)
 
 
     def _assertMatrixEqual(self, matrix, *lists):
@@ -59,6 +60,8 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(TypeError, pytrix.Matrix, 1, 2, 3)
         self.assertRaises(TypeError, pytrix.Matrix, [[1, 2, 3]], [])
         self.assertRaises(TypeError, pytrix.Matrix, [1, 2, 3], [[1, 2, 3]])
+        self.assertRaises(TypeError, pytrix.Matrix, pytrix.Point([1, 2, 3]))
+        self.assertRaises(TypeError, pytrix.Matrix, pytrix.Vector([1, 2, 3]))
 
     def testMatrixAdd(self):
         # Test typical matrix additions
@@ -81,6 +84,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: self.e1 + self.zero1)
         self.assertRaises(ValueError, lambda *x: self.zero2 + self.e1)
         self.assertRaises(TypeError, lambda *x: self.m1 + pytrix.Vector([1, 2, 3]))
+        self.assertRaises(TypeError, lambda *x: self.m1 + pytrix.Point([1, 2, 3]))
 
     def testMatrixSub(self):
         # Test typical matrix subtractions
@@ -102,6 +106,8 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: self.m1 - self.zero2)
         self.assertRaises(ValueError, lambda *x: self.m1 - self.e1)
         self.assertRaises(ValueError, lambda *x: self.zero1 - self.e1)
+        self.assertRaises(TypeError, lambda *x: self.m1 - pytrix.Vector([1, 2, 3]))
+        self.assertRaises(TypeError, lambda *x: self.m1 - pytrix.Point([1, 2, 3]))
 
     def testMatrixMul(self):
         # Test scalar matrix multiplications
@@ -128,6 +134,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: v * self.e1)
         self.assertRaises(ValueError, lambda *x: pytrix.Vector([]) * self.m1)
         self.assertRaises(ValueError, lambda *x: self.m1 * pytrix.Vector([]))
+        self.assertRaises(TypeError, lambda *x: self.m1 * pytrix.Point(1, 2, 3))
         self.assertEqual(list(v * self.m1), list(pytrix.Vector([30, 36, 42])))
         self.assertEqual(v * self.zero3, pytrix.Vector([0, 0, 0]))
         self.assertEqual(list(self.m1 * v), list(pytrix.Vector([14, 32, 50])))
@@ -153,7 +160,6 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(self.zero3, -self.zero3)
         self._assertMatrixEqual(-self.m1, [-1, -2, -3], [-4, -5, -6], [-7, -8, -9])
 
-
     def testMatrixTruth(self):
         self.assertTrue(self.m1)
         self.assertFalse(self.zero1)
@@ -170,6 +176,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertEqual(self.m1[2][2], 9)
         self.assertRaises(IndexError, self.m1.__getitem__, 3)
         self.assertRaises(IndexError, self.e1.__getitem__, 0)
+        self.assertRaises(TypeError, self.e1.__getitem__, pytrix.Point(1, 2, 3))
 
     def testMatrixTranspose(self):
         self.assertEqual(self.m1, self.m1.transpose().transpose())
@@ -180,6 +187,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(IndexError, self.e1.row, 0)
         self.assertRaises(IndexError, self.m1.row, -1)
         self.assertRaises(IndexError, self.m1.row, 10)
+        self.assertRaises(TypeError, self.m1.row, pytrix.Point(1, 2, 3))
         self.assertEqual(list(self.m1.row(0)), [1, 2, 3])
         self.assertEqual(list(self.m1.row(1)), [4, 5, 6])
         self.assertEqual(list(self.m1.row(2)), [7, 8, 9])
@@ -189,6 +197,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(IndexError, self.e1.column, 0)
         self.assertRaises(IndexError, self.m1.column, -1)
         self.assertRaises(IndexError, self.m1.column, 10)
+        self.assertRaises(TypeError, self.m1.column, pytrix.Point(1, 2, 3))
         self.assertEqual(list(self.m1.column(0)), [1, 4, 7])
         self.assertEqual(list(self.m1.column(1)), [2, 5, 8])
         self.assertEqual(list(self.m1.column(2)), [3, 6, 9])
@@ -285,6 +294,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(TypeError, self.m1.permute, 0, 5.5)
         self.assertRaises(TypeError, self.m1.permute, 0, "5")
         self.assertRaises(TypeError, self.m1.permute, 0, [])
+        self.assertRaises(TypeError, self.m1.permute, 0, pytrix.Point(1, 2, 3))
 
         self.assertEqual(self.zero1, self.zero1.permute(0, 0))
         self.assertEqual(self.m1, self.m1.permute(0, 0))

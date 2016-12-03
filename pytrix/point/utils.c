@@ -206,55 +206,6 @@ Point *_pointSub(Point *a, Vector *b) {
 }
 
 
-Point *_pointMul(Point *self, VECTOR_TYPE multiplier) {
-/*  Multiplies the components of a point by a scalar to construct a new point.
-
-    Inputs: self       - The point to be multiplied by multiplier.
-            multiplier - The scalar to multiply self by.
-
-    Outputs: A new Point object constructed by performing self * multiplier, or NULL if an error occurred.
-*/
-
-    Point *product;
-    unsigned int i;
-
-    if ((product = _pointNew(self->dimensions)) == NULL)
-        return NULL;
-
-    for (i = 0; i < self->dimensions; i++)
-        Point_SetValue(product, i, Point_GetValue(self, i) * multiplier);
-
-    return product;
-}
-
-
-Point *_pointDiv(Point *self, VECTOR_TYPE divisor) {
-/*  Divides the components of a point by a scalar to construct a new point.
-
-    Inputs: self    - The point to be divided by divisor.
-            divisor - The scalar to divide self by.
-
-    Outputs: A new Point object constructed by performing self / divisor or NULL if an error occurred.
-*/
-
-    Point *quotient;
-    unsigned int i;
-
-    if (divisor == 0) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "Point division by zero.");
-        return NULL;
-    }
-
-    if ((quotient = _pointNew(self->dimensions)) == NULL)
-        return NULL;
-
-    for (i = 0; i < self->dimensions; i++)
-        Point_SetValue(quotient, i, Point_GetValue(self, i) / divisor);
-
-    return quotient;
-}
-
-
 Point *_pointNeg(Point *self) {
 /*  Negates the components of a point to construct a new point.
 

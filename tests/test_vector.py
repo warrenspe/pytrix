@@ -14,6 +14,10 @@ class TestVector(tests.PytrixTestCase):
         self.zero2 = pytrix.Vector([0, 0, 0])
         self.v1 = pytrix.Vector([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
         self.v2 = pytrix.Vector([0, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+        self.p0 = pytrix.Point([])
+        self.p1 = pytrix.Point(1)
+        self.p2 = pytrix.Point(1, 2)
+        self.p3 = pytrix.Point(1, 2, 3)
 
 
     def testVectorInit(self):
@@ -21,7 +25,9 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, pytrix.Vector, None)
         self.assertRaises(TypeError, pytrix.Vector, '1')
         self.assertRaises(TypeError, pytrix.Vector, [[1, 2, 3]])
+        self.assertRaises(TypeError, pytrix.Vector, pytrix.Point(1, 2, 3))
         self.assertEqual(len(list(pytrix.Vector([1, 2, 3]))), 3)
+        self.assertEqual(len(list(pytrix.Vector(1, 2, 3))), 3)
         self.assertEqual(list(pytrix.Vector(1, 2, 3, 4, 5, 6)), [1, 2, 3, 4, 5, 6])
 
 
@@ -34,6 +40,26 @@ class TestVector(tests.PytrixTestCase):
         self.assertEqual(list(self.zero1 + self.zero1 + self.zero1), [0, 0])
         self.assertEqual(list(self.zero2 + self.zero2 + self.zero2), [0, 0, 0])
         self.assertEqual(self.v1 + self.v2, self.v2 + self.v1)
+
+        # Test Vector + Point additions
+        self.assertEqual(self.e1 + self.p0, self.p0)
+        self.assertEqual(self.zero0 + self.p1, self.p1)
+        self.assertEqual(self.zero1 + self.p2, self.p2)
+        self.assertEqual(self.zero2 + self.p3, self.p3)
+        self.assertEqual(self.zero2 + self.p3 + self.zero2, self.p3)
+        self.assertRaises(ValueError, lambda *x: self.v1 + self.p3)
+        self.assertRaises(ValueError, lambda *x: self.zero0 + self.p2)
+        self.assertRaises(ValueError, lambda *x: self.zero1 + self.p3)
+        self.assertRaises(ValueError, lambda *x: self.zero1 + self.p3)
+
+        self.assertEqual(self.p0 + self.e1, self.p0)
+        self.assertEqual(self.p1 + self.zero0, self.p1)
+        self.assertEqual(self.p2 + self.zero1, self.p2)
+        self.assertEqual(self.p3 + self.zero2, self.p3)
+        self.assertRaises(ValueError, lambda *x: self.p3 + self.v1)
+        self.assertRaises(ValueError, lambda *x: self.p2 + self.zero0)
+        self.assertRaises(ValueError, lambda *x: self.p3 + self.zero1)
+        self.assertRaises(ValueError, lambda *x: self.p3 + self.zero1)
 
         # Test erroneous vector additions
         self.assertRaises(TypeError, lambda *x: self.v1 + 1)
@@ -56,6 +82,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertEqual(self.v1 - self.v2, -(self.v2 - self.v1))
 
         # Test erroneous vector subtractions
+        self.assertRaises(TypeError, lambda *x: self.zero2 - self.p3)
         self.assertRaises(TypeError, lambda *x: self.v1 - 1)
         self.assertRaises(TypeError, lambda *x: 1 - self.v1)
         self.assertRaises(TypeError, lambda *x: [] - self.v1)
@@ -79,6 +106,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, lambda *x: self.v1 * [])
         self.assertRaises(TypeError, lambda *x: self.v1 * "0")
         self.assertRaises(TypeError, lambda *x: self.v1 * self.v2)
+        self.assertRaises(TypeError, lambda *x: self.zero2 * self.p3)
 
     def testVectorDiv(self):
         # Test typical vector divisions
@@ -93,6 +121,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, lambda *x: self.v1 / self.v2)
         self.assertRaises(TypeError, lambda *x: 5 / self.v1)
         self.assertRaises(ZeroDivisionError, lambda *x: self.zero0 / 0)
+        self.assertRaises(TypeError, lambda *x: self.zero2 / self.p3)
 
     def testVectorNeg(self):
         self.assertEqual(self.e1, -self.e1)
@@ -140,6 +169,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, self.zero1.dot, 1)
         self.assertRaises(TypeError, self.zero1.dot, [])
         self.assertRaises(TypeError, self.zero1.dot, "")
+        self.assertRaises(TypeError, self.zero1.dot, self.p1)
 
     def testVectorCross(self):
         c1 = pytrix.Vector([1, 2, 3])
@@ -152,6 +182,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, self.zero1.cross, 1)
         self.assertRaises(TypeError, self.zero1.cross, [])
         self.assertRaises(TypeError, self.zero1.cross, "")
+        self.assertRaises(TypeError, self.zero1.cross, self.p1)
 
     def testVectorLength(self):
         self.assertAlmostEqual(self.v1.length(), 16.88, delta=.01)
@@ -208,6 +239,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, va.cross, 1)
         self.assertRaises(TypeError, va.cross, [])
         self.assertRaises(TypeError, va.cross, "")
+        self.assertRaises(TypeError, va.cross, self.p2)
 
     def testVectorOrthogonal(self):
         v1 = pytrix.Vector([125, 6093, 125])
@@ -234,6 +266,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertRaises(TypeError, v1.orthogonal, 1)
         self.assertRaises(TypeError, v1.orthogonal, [])
         self.assertRaises(TypeError, v1.orthogonal, "")
+        self.assertRaises(TypeError, v1.orthogonal, self.p3)
 
     def testVectorGetItem(self):
         self.assertEqual(self.v1[0], 1)
@@ -243,3 +276,5 @@ class TestVector(tests.PytrixTestCase):
         self.assertEqual(self.v1[4], 5)
         self.assertEqual(self.v1[5], 6)
         self.assertRaises(IndexError, self.v1.__getitem__, 11)
+        self.assertRaises(IndexError, self.e1.__getitem__, 0)
+        self.assertRaises(TypeError, self.v1.__getitem__, self.p3)

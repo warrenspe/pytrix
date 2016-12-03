@@ -38,8 +38,8 @@ static PyNumberMethods PointNumberMethods = {
 static PyNumberMethods PointNumberMethods = {
     (binaryfunc)pointAdd,
     (binaryfunc)pointSub,
-    (binaryfunc)pointMul,
-    (binaryfunc)pointDiv,
+    0,
+    0,
     0,
     0,
     0,

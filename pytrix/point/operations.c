@@ -93,11 +93,10 @@ PyObject *pointSub(PyObject *a, PyObject *b) {
 
 
 PyObject *pointMul(PyObject *a, PyObject *b) {
-/*  Multiplies each of the components of a point by a scalar or a matrix to create a new point.
+/*  Multiplies each of the components of a point by a scalar to create a new point.
     Note that both arguments must be sanitized, as any Python object may be passed in either slot.
     We expect one of a or b to be a Point object, and the other object to be a python object implementing the
-    numerical protocol, or a Matrix.  They can come in either order if it is a scalar, if we're multiplying with a
-    matrix, the first argument will be the point and the second the matrix.
+    numerical protocol.  They can come in either order.
 
     Inputs: a - Supposedly either the point to multiply by b, or the scalar to multiply b with.
             b - Supposedly either the point to multiply by a, or the scalar to multiply a with.
@@ -115,8 +114,6 @@ PyObject *pointMul(PyObject *a, PyObject *b) {
     } else if (PyNumber_Check(b)) {
         multiplier = PyNumber_AS_VECTOR_TYPE(b);
         p = (Point *)a;
-    } else if (Matrix_Check(b)) {
-        return (PyObject *)_pointMatrixMul(a, b);
 
     } else {
         Py_INCREF(Py_NotImplemented);

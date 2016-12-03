@@ -2,8 +2,6 @@ think about adding a linearComb function to do slightly faster linear combinatio
 
 setup line intersection func
 
-pyobject_del in deinits?
-
 use struct Vectors in matrices, not pyobjects; use non-py matrices where a temp matrix is needed (strassen!)
 
 seven dimensional cross prod
@@ -16,8 +14,10 @@ islowertriangular
 
 partial pivoting in inverse alg
 
-
-POINT CLASS
 DOCUMENTATION
 
 smart padding add/sub - don't do extra work comparing 0's
+
+test matrix iter unit tests
+
+if not tuple or list in init function try to cast to list

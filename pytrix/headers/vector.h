@@ -33,6 +33,27 @@ static PyNumberMethods VectorNumberMethods = {
     0,
     0,
     (inquiry)vectorTrue,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    vectorDiv
 };
 #else
 static PyNumberMethods VectorNumberMethods = {

@@ -25,7 +25,7 @@ static PyMemberDef PointMembers[] = {
 static PyNumberMethods PointNumberMethods = {
     (binaryfunc)pointAdd,
     (binaryfunc)pointSub,
-    (binaryfunc)pointMul,
+    0,
     0,
     0,
     0,

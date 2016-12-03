@@ -619,7 +619,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, self.zero2._strassenMul, self.zero3, 2)
 
         for size in (2, 4, 8, 11, 14, 15, 16, 17, 32, 33, 45, 51):
-            m = pytrix.Matrix([range((s * size), (s * size) + size) for s in range(size)])
+            m = pytrix.Matrix([list(range((s * size), (s * size) + size)) for s in range(size)])
             nm = m._naiveMul(m)
             sm2 = m._strassenMul(m, 2)
             sm4 = m._strassenMul(m, 4)

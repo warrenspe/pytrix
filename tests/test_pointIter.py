@@ -26,7 +26,7 @@ class TestPointIter(tests.PytrixTestCase):
         self.assertEqual(len(gc.get_referrers(v)), 2)
         try:
             while True:
-                i.next()
+                next(i)
         except StopIteration:
             self.assertEqual(len(gc.get_referrers(v)), 1)
 
@@ -49,7 +49,7 @@ class TestPointIter(tests.PytrixTestCase):
         curr = 1
         try:
             while True:
-                self.assertEqual(curr, i.next())
+                self.assertEqual(curr, next(i))
                 curr += 1
         except StopIteration:
             self.assertEqual(curr, 6)
@@ -60,7 +60,7 @@ class TestPointIter(tests.PytrixTestCase):
         curr = 1
         try:
             while True:
-                self.assertEqual(curr, i.next())
+                self.assertEqual(curr, next(i))
                 curr += 1
         except StopIteration:
             self.assertEqual(curr, 6)

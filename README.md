@@ -127,6 +127,16 @@ True
 False
 ```
 
+#### Matrix.copy()
+Returns a new copy of this Matrix.
+```
+>>> m = pytrix.Matrix([1, 2, 3], [4, 5, 6], [7, 8, 9])
+>>> print(id(m))
+7696580423856
+>>> print(id(m.copy()))
+7696580424016
+```
+
 #### Matrix.row(Int)
 Matrix.row returns the ith row of the Matrix as a Vector.
 ```

@@ -63,6 +63,13 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(TypeError, pytrix.Matrix, pytrix.Point([1, 2, 3]))
         self.assertRaises(TypeError, pytrix.Matrix, pytrix.Vector([1, 2, 3]))
 
+    def testMatrixCopy(self):
+        self.assertEqual(self.m1, self.m1.copy())
+        self.assertEqual(self.e1, self.e1.copy())
+        self.assertEqual(self.zero1, self.zero1.copy())
+        self.assertNotEqual(id(self.m1), id(self.m1.copy()))
+        self.assertNotEqual(id(self.e1), id(self.e1.copy()))
+
     def testMatrixAdd(self):
         # Test typical matrix additions
         self._assertMatrixEqual(self.m1 + self.m2, [10, 10, 10], [10, 10, 10], [10, 10, 10])
@@ -135,7 +142,7 @@ class TestMatrix(tests.PytrixTestCase):
         self.assertRaises(ValueError, lambda *x: pytrix.Vector([]) * self.m1)
         self.assertRaises(ValueError, lambda *x: self.m1 * pytrix.Vector([]))
         self.assertRaises(TypeError, lambda *x: self.m1 * pytrix.Point(1, 2, 3))
-        self.assertEqual(list(v * self.m1), list(pytrix.Vector([30, 36, 42])))
+        self.assertEqual(list(v * self.m1), list(pytrix.Vector([14, 32, 50])))
         self.assertEqual(v * self.zero3, pytrix.Vector([0, 0, 0]))
         self.assertEqual(list(self.m1 * v), list(pytrix.Vector([14, 32, 50])))
         self.assertEqual(self.zero3 * v, pytrix.Vector([0, 0, 0]))

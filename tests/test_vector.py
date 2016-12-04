@@ -100,6 +100,7 @@ class TestVector(tests.PytrixTestCase):
         self.assertEqual(list(5 * self.e1), [])
         self.assertEqual(list(5 * self.zero0), [0])
         self.assertEqual(5 * self.v2, self.v2 * 5)
+        self.assertEqual(pytrix.Vector(1, 2, 3) * pytrix.Matrix([1, 2, 3], [4, 5, 6]), pytrix.Vector(14, 32))
 
         # Test erroneous vector multiplications
         self.assertRaises(TypeError, lambda *x: [] * self.v1)
@@ -244,29 +245,29 @@ class TestVector(tests.PytrixTestCase):
     def testVectorOrthogonal(self):
         v1 = pytrix.Vector([125, 6093, 125])
         v2 = pytrix.Vector([120, 1320, 2503])
-        self.assertFalse(self.v1.orthogonal(self.v2))
+        self.assertFalse(self.v1.isOrthogonal(self.v2))
 
-        self.assertTrue(v1.orthogonal(v1.cross(v2)))
-        self.assertTrue(v2.orthogonal(v2.cross(v1)))
+        self.assertTrue(v1.isOrthogonal(v1.cross(v2)))
+        self.assertTrue(v2.isOrthogonal(v2.cross(v1)))
 
         v1 = pytrix.Vector([1, 0])
         v2 = pytrix.Vector([0, -1])
         v3 = pytrix.Vector([-1, 0])
         v4 = pytrix.Vector([0, 1])
 
-        self.assertTrue(v1.orthogonal(v2))
-        self.assertTrue(v1.orthogonal(v4))
-        self.assertTrue(v2.orthogonal(v1))
-        self.assertTrue(v2.orthogonal(v3))
-        self.assertTrue(v3.orthogonal(v2))
-        self.assertTrue(v3.orthogonal(v4))
-        self.assertTrue(v4.orthogonal(v1))
-        self.assertTrue(v4.orthogonal(v3))
+        self.assertTrue(v1.isOrthogonal(v2))
+        self.assertTrue(v1.isOrthogonal(v4))
+        self.assertTrue(v2.isOrthogonal(v1))
+        self.assertTrue(v2.isOrthogonal(v3))
+        self.assertTrue(v3.isOrthogonal(v2))
+        self.assertTrue(v3.isOrthogonal(v4))
+        self.assertTrue(v4.isOrthogonal(v1))
+        self.assertTrue(v4.isOrthogonal(v3))
 
-        self.assertRaises(TypeError, v1.orthogonal, 1)
-        self.assertRaises(TypeError, v1.orthogonal, [])
-        self.assertRaises(TypeError, v1.orthogonal, "")
-        self.assertRaises(TypeError, v1.orthogonal, self.p3)
+        self.assertRaises(TypeError, v1.isOrthogonal, 1)
+        self.assertRaises(TypeError, v1.isOrthogonal, [])
+        self.assertRaises(TypeError, v1.isOrthogonal, "")
+        self.assertRaises(TypeError, v1.isOrthogonal, self.p3)
 
     def testVectorGetItem(self):
         self.assertEqual(self.v1[0], 1)

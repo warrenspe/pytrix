@@ -289,72 +289,37 @@ Matrix *_scalarMatrixMul(Matrix *self, VECTOR_TYPE multiplier) {
 }
 
 
-Vector *_vectorMatrixMul(PyObject *a, PyObject *b) {
+Vector *_vectorMatrixMul(Matrix *m, Vector *v) {
 /*  Multiplies a Matrix by a Vector.
 
-    Inputs: a - Either the Vector or the matrix to multiply.
-            b - Either the Vector or the matrix to multiply.
+    Inputs: m - The matrix to multiply.
+            v - The vector to multiply.
 
     Outputs: A new Vector constructed by performing a * b, or NULL if an error occurred.
 */
 
     unsigned int i,
                  j;
-    Vector *inVector,
-           *outVector;
-    Matrix *inMatrix;
+    Vector *outVector;
     VECTOR_TYPE val;
 
-    // There are two cases here.  If the vector is the first argument, then we perform left-hand vector multiplication
-    if (Vector_Check(a) && Matrix_Check(b)) {
-        inVector = (Vector *)a;
-        inMatrix = (Matrix *)b;
-
-        if (inVector->dimensions != inMatrix->rows) {
-            PyErr_SetString(PyExc_ValueError, "Vector * Matrix multiplication must have V.dimensions = M.rows");
-            return NULL;
-        }
-
-        outVector = _vectorNew(inVector->dimensions);
-
-        for (i = 0; i < inMatrix->columns; i++) {
-            val = 0;
-            for (j = 0; j < inVector->dimensions; j++) {
-                val += Vector_GetValue(inVector, j) * Matrix_GetValue(inMatrix, j, i);
-            }
-
-            Vector_SetValue(outVector, i, val);
-        }
-
-        return outVector;
-
-    // If the vector is the second, right-hand vector multiplication
-    } else if (Matrix_Check(a) && Vector_Check(b)) {
-        inVector = (Vector *)b;
-        inMatrix = (Matrix *)a;
-
-        if (inVector->dimensions != inMatrix->columns) {
-            PyErr_SetString(PyExc_ValueError, "Matrix * Vector multiplication must have M.cols = V.dimensions");
-            return NULL;
-        }
-
-        outVector = _vectorNew(inVector->dimensions);
-
-        for (i = 0; i < inMatrix->rows; i++) {
-            val = 0;
-            for (j = 0; j < inVector->dimensions; j++) {
-                val += Matrix_GetValue(inMatrix, i, j) * Vector_GetValue(inVector, j);
-            }
-
-            Vector_SetValue(outVector, i, val);
-        }
-
-        return outVector;
+    if (v->dimensions != m->columns) {
+        PyErr_SetString(PyExc_ValueError, "Matrix * Vector multiplication must have M.cols = V.dimensions");
+        return NULL;
     }
 
-    // Otherwise, our inputs are undefined. Return an error
-    PyErr_SetString(PyExc_TypeError, "Undefined inputs. Vector-Matrix multiplication requires a Vector & Matrix.");
-    return NULL;
+    outVector = _vectorNew(m->rows);
+
+    for (i = 0; i < m->rows; i++) {
+        val = 0;
+        for (j = 0; j < v->dimensions; j++) {
+            val += Matrix_GetValue(m, i, j) * Vector_GetValue(v, j);
+        }
+
+        Vector_SetValue(outVector, i, val);
+    }
+
+    return outVector;
 }
 
 

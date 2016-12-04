@@ -253,7 +253,7 @@ PyObject *vectorMul(PyObject *a, PyObject *b) {
         multiplier = PyNumber_AS_VECTOR_TYPE(b);
         v = (Vector *)a;
     } else if (Matrix_Check(b)) {
-        return (PyObject *)_vectorMatrixMul(a, b);
+        return (PyObject *)_vectorMatrixMul((Matrix *)b, (Vector *)a);
 
     } else {
         Py_INCREF(Py_NotImplemented);

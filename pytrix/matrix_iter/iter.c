@@ -26,13 +26,13 @@ PyObject *MatrixIter_next(MatrixIter *self) {
     Matrix *iterating = (Matrix *)self->iterating;
     Vector *next;
 
-    if (self->i < iterating->rows) {
+    if (iterating != NULL && self->i < iterating->rows) {
         next = Matrix_GetVector(iterating, ((self->i)++));
         return (PyObject *)_vectorCopy(next);
     }
 
     // Now that we're done iterating over this object we can remove our reference to it.
-    Py_DECREF(self->iterating);
+    Py_XDECREF(self->iterating);
     self->iterating = NULL;
     PyErr_SetNone(PyExc_StopIteration);
     return NULL;

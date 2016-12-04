@@ -25,6 +25,7 @@ PyObject *matrixIter(Matrix *);
 
 // operations.c
 PyObject *matrixStr(Matrix *);
+PyObject *matrixCopy(PyObject *);
 PyObject *matrixItem(PyObject *, Py_ssize_t);
 PyObject *matrixAdd(PyObject *, PyObject *);
 PyObject *matrixSub(PyObject *, PyObject *);
@@ -64,7 +65,7 @@ unsigned char _matricesEqual(Matrix *, Matrix *);
 Matrix *_matrixAdd(Matrix *, Matrix *);
 Matrix *_matrixSub(Matrix *, Matrix *);
 Matrix *_scalarMatrixMul(Matrix *, VECTOR_TYPE);
-Vector *_vectorMatrixMul(PyObject *, PyObject *);
+Vector *_vectorMatrixMul(Matrix *, Vector *);
 unsigned char _inplaceMatrixMatrixMul(Matrix *, Matrix *, Matrix *);
 Matrix *_matrixMatrixMul(Matrix *, Matrix *, unsigned char);
 Matrix *_matrixNeg(Matrix *);

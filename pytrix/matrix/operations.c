@@ -59,7 +59,7 @@ PyObject *matrixStr(Matrix *self) {
     }
 
     // Create a newline-delimited version of all the vector reprs joined
-    if ((newlineStr = PyBytes_FromString(cNewline)) == NULL || PyErr_Occurred() != NULL) {
+    if ((newlineStr = PyUnicode_FromString(cNewline)) == NULL || PyErr_Occurred() != NULL) {
         Py_DECREF(vectorReprs);
         return NULL;
     }
@@ -72,26 +72,19 @@ PyObject *matrixStr(Matrix *self) {
 
     Py_DECREF(newlineStr);
     Py_DECREF(vectorReprs);
-    return matrixRepr; // TODO figure out refcounts, leave nothing alive
+    return matrixRepr;
 }
 
 
-PyObject *matrixAdd(PyObject *a, PyObject *b) {
-/*  Adds the components of two matrices together to create a new matrix.
-    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
+PyObject *matrixCopy(PyObject *self) {
+/*  Creates a new copy of this matrix object.
 
-    Inputs: a - Supposedly the first matrix to add.
-            b - Supposedly the second matrix to add.
+    Inputs: self - The matrix to copy.
 
-    Outputs: A new matrix constructed by performing a + b, or NULL if an exception occurred.
+    Outputs: A new matrix with the same values as this matrix.
 */
 
-    if (!(Matrix_Check(a) && Matrix_Check(b))) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
-    }
-
-    return (PyObject *)_matrixAdd((Matrix *)a, (Matrix *)b);
+    return (PyObject *)_matrixCopy((Matrix *)self);
 }
 
 
@@ -117,6 +110,25 @@ PyObject *matrixItem(PyObject *self, Py_ssize_t i) {
         return NULL;
 
     return (PyObject *)v;
+}
+
+
+PyObject *matrixAdd(PyObject *a, PyObject *b) {
+/*  Adds the components of two matrices together to create a new matrix.
+    Note that both arguments must be sanitized, as any Python object may be passed in either slot.
+
+    Inputs: a - Supposedly the first matrix to add.
+            b - Supposedly the second matrix to add.
+
+    Outputs: A new matrix constructed by performing a + b, or NULL if an exception occurred.
+*/
+
+    if (!(Matrix_Check(a) && Matrix_Check(b))) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+
+    return (PyObject *)_matrixAdd((Matrix *)a, (Matrix *)b);
 }
 
 
@@ -164,7 +176,7 @@ PyObject *matrixMul(PyObject *a, PyObject *b) {
 
     // Otherwise, if one of our other operands is a Vector, perform vector multiplication
     if (Vector_Check(b))
-        return (PyObject *)_vectorMatrixMul(a, b);
+        return (PyObject *)_vectorMatrixMul((Matrix *)a, (Vector *)b);
 
     // Otherwise if both our operands are matrices, perform matrix multiplication
     if (Matrix_Check(a) && Matrix_Check(b))

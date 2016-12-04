@@ -38,6 +38,7 @@ class TestVectorIter(tests.PytrixTestCase):
         i = iter(v)
         del v
         self.assertEqual(list(i), [1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
+        self.assertRaises(StopIteration, next, i)
 
     def testIteration(self):
         v = pytrix.Vector([1, 2, 3, 4, 5])

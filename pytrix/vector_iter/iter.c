@@ -25,11 +25,11 @@ PyObject *VectorIter_next(VectorIter *self) {
 
     Vector *iterating = (Vector *)self->iterating;
 
-    if (self->i < iterating->dimensions)
+    if (iterating != NULL && self->i < iterating->dimensions)
         return PyNumber_FROM_VECTOR_TYPE(Vector_GetValue(iterating, ((self->i)++)));
 
     // Now that we're done iterating over this object we can remove our reference to it.
-    Py_DECREF(self->iterating);
+    Py_XDECREF(self->iterating);
     self->iterating = NULL;
     PyErr_SetNone(PyExc_StopIteration);
     return NULL;

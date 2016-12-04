@@ -14,10 +14,6 @@ islowertriangular
 
 partial pivoting in inverse alg
 
-DOCUMENTATION
-
 smart padding add/sub - don't do extra work comparing 0's
-
-test matrix iter unit tests
 
 if not tuple or list in init function try to cast to list

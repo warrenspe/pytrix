@@ -63,6 +63,8 @@ static PySequenceMethods MatrixSequenceMethods = {
 };
 
 static PyMethodDef MatrixMethods[] = {
+    {"copy", (PyCFunction)matrixCopy, METH_NOARGS,
+        PyDoc_STR("Returns a new copy of this Matrix.")},
     {"row", (PyCFunction)matrixRow, METH_VARARGS,
         PyDoc_STR("Returns the ith row of this Matrix as a Vector.")},
     {"column", (PyCFunction)matrixColumn, METH_VARARGS,

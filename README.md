@@ -450,9 +450,192 @@ Matrices have two attributes, `rows` and `columns` which are integer values corr
 
 ### Vector
 
+#### Vector.\_\_init__(...)
+Vectors can be instantiated by passing either a list containing the values of the vector, or by passing the values of the vector to the constructor itself.
+```
+>>> v = pytrix.Vector([1, 2, 3])
+>>> print(v)
+(1.0, 2.0, 3.0)
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v)
+(1.0, 2.0, 3.0)
+```
+
+#### Vector.\_\_getitem__(Int)
+It is possible to extract the components from a Vector using dictionary-style indexing.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v[0])
+1.0
+>>> print(v[1])
+2.0
+>>> print(v[2])
+3.0
+>>> print(v[3])
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: Cannot return item in index 3 of Vector with 3 dimensions.
+```
+
+#### Vector.\_\_add__(Vector)
+A vector can be component-wise added with another vector to produce a new third vector.
+```
+>>> v1 = pytrix.Vector(1, 2, 3)
+>>> v2 = pytrix.Vector(4, 5, 6)
+>>> print(v1 + v2)
+(5.0, 7.0, 9.0)
+>>> v2 = pytrix.Vector(4, 5)
+>>> print(v1 + v2)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: Vectors must be of the same dimensions.
+```
+
+#### Vector.\_\_sub__(Vector)
+A vector can be component-wise subtracted from another veector to produce a new third vector.
+```
+>>> v1 = pytrix.Vector(1, 2, 3)
+>>> v2 = pytrix.Vector(4, 5, 6)
+>>> print(v1 - v2)
+(-3.0, -3.0, -3.0)
+>>> v2 = pytrix.Vector(4, 5)
+>>> print(v1 - v2)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: Vectors must be of the same dimensions.
+```
+
+#### Vector.\_\_mul__(MatrixOrScalar)
+A vector can be multiplied by either a matrix, or a scalar to produce a new vector. Note that if it is being multiplied by a matrix it will always take the form M\*V.  In other words, the matrix will always be the left operand and the vector the right.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> m = pytrix.Matrix([1, 2, 3], [4, 5, 6])
+>>> print(v)
+(1.0, 2.0, 3.0)
+>>> print(m)
+[1.0, 2.0, 3.0]
+[4.0, 5.0, 6.0]
+>>> print(v * m)
+(14.0, 32.0)
+>>> print(v * 5)
+(5.0, 10.0, 15.0)
+```
+
+#### Vector.\_\_div__(Scalar)
+Creates a new vector by dividing the components of a vector by a scalar.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v)
+(1.0, 2.0, 3.0)
+>>> print(v / 5)
+(0.2, 0.4, 0.6)
+```
+
+#### Vector.\_\_neg__()
+Creates a new vector by negating the components of a vector.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v)
+(1.0, 2.0, 3.0)
+>>> print(-v)
+(-1.0, -2.0, -3.0)
+```
+
+#### Vector.\_\_bool__()
+Returns True if the vector contains any non-zero components, else False.
+```
+>>> v = pytrix.Vector(0, 0, 0)
+>>> print(bool(v))
+False
+```
+
+#### Vector.copy()
+Returns a new copy of this Vector.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(id(v))
+7696578907216
+>>> print(id(v.copy()))
+7696578907696
+>>>
+```
+
+#### Vector.dot(Vector)
+Calculates the dot product of this vector with another.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> v.dot(v)
+14.0
+```
+
+#### Vector.cross(Vector)
+Calculates the cross product of this vector with another.
+```
+>>> v1 = pytrix.Vector(1, 2, 3)
+>>> v2 = pytrix.Vector(4, 5, 6)
+>>> print(v1.cross(v2))
+(-3.0, 6.0, -3.0)
+```
+
+#### Vector.length()
+Calculates the length of this vector.
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v.length())
+3.7416573867739413
+>>> v = pytrix.Vector(0, 0, 0)
+>>> print(v.length())
+0.0
+```
+
+#### Vector.unit()
+Returns a new vector with the same direction as this vector but with a length of 1
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> u = v.unit()
+>>> print(u)
+(0.2672612419124244, 0.5345224838248488, 0.8017837257372732)
+>>> print(u.length())
+1.0
+```
+
+### Vector.isUnit()
+Determines whether or not the vector is a unit vector (ie has length 1)
+```
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(v.isUnit())
+False
+>>> v = pytrix.Vector(1, 0, 0)
+>>> print(v.isUnit())
+True
+```
+
+#### Vector.angleBetween(Vector)
+Calculates the angle between two vectors in radians.
+```
+>>> v1 = pytrix.Vector(1, 0, 0)
+>>> v1.angleBetween(v1)
+0.0
+>>> v2 = pytrix.Vector(0, 1, 0)
+>>> v1.angleBetween(v2)
+1.5707963267948966
+```
+
+#### Vector.isOrthogonal(Vector)
+Determines whether two vectors are orthogonal to each other.
+```
+>>> v1 = pytrix.Vector(1, 0, 0)
+>>> v1.isOrthogonal(v1)
+False
+>>> v2 = pytrix.Vector(0, 1, 0)
+>>> v1.isOrthogonal(v2)
+True
+```
+
 ### Point
 
 ### Convenience Matrix Functions
+
 #### identityMatrix(dimensions)
 Constructs an identity matrix of a specified number of dimensions
 ```

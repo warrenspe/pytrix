@@ -2,7 +2,7 @@ import os
 import distutils.core
 
 DEBUG_COMPILE_ARGS = None
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 NAME = "pytrix"
 
 if "DEBUG" in os.environ:

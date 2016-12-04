@@ -599,7 +599,7 @@ Returns a new vector with the same direction as this vector but with a length of
 1.0
 ```
 
-### Vector.isUnit()
+#### Vector.isUnit()
 Determines whether or not the vector is a unit vector (ie has length 1)
 ```
 >>> v = pytrix.Vector(1, 2, 3)
@@ -632,7 +632,98 @@ False
 True
 ```
 
+#### Vector Attributes
+Vectors have a single attribute, `dimensions` which is an integer value corresponding to the vectors' number of components.
+```
+>>> v = pytrix.Vector(1, 2, 3, 4)
+>>> print(v.dimensions)
+4
+```
+
 ### Point
+
+#### Point.\_\_init__(...)
+Points can be instantiated by passing either a list containing the coordinates of the point, or by passing the coordinates of the point to the constructor itself.
+```
+>>> p = pytrix.Point([1, 2, 3])
+>>> print(p)
+(1.0, 2.0, 3.0)
+>>> p = pytrix.Point(1, 2, 3)
+>>> print(p)
+(1.0, 2.0, 3.0)
+```
+
+#### Point.\_\_getitem__(Int)
+It is possible to extract the coordinates from a Point using dictionary-style indexing.
+```
+>>> p = pytrix.Point(1, 2, 3)
+>>> print(p[0])
+1.0
+>>> print(p[1])
+2.0
+>>> print(p[2])
+3.0
+>>> print(p[3])
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: Cannot return item in index 3 of Point with 3 dimensions.
+```
+
+#### Point.\_\_add__(Vector)
+A point can be added with a vector to construct a new point object.
+```
+>>> p = pytrix.Point(1, 2, 3)
+>>> v = pytrix.Vector(1, 2, 3)
+>>> print(p + v)
+(2.0, 4.0, 6.0)
+```
+
+#### Point.\_\_sub__(PointOrVector)
+A point can be subtracted from either a vector or another point.  If it is subtracted from a vector, it returns a Point, similar to how Point.\_\_add__ works.  If it is subtracted from another point, it returns a vector, which maps from the second point to the first.
+```
+>>> p1 = pytrix.Point(2, 3, 4)
+>>> p2 = pytrix.Point(1, 2, 3)
+>>> p1 - p2
+<pytrix.Vector object at 0x6ffffda0cd0>
+>>> v = p1 - p2
+>>> print(v)
+(1.0, 1.0, 1.0)
+>>> p1 - v
+<pytrix.Point object at 0x6ffffda0e30>
+>>> print(p1 - v)
+(1.0, 2.0, 3.0)
+```
+
+#### Point.\_\_neg__()
+Constructs a new point by negating the coordinates of this point.
+```
+>>> p = pytrix.Point(1, 2, 3)
+>>> print(p)
+(1.0, 2.0, 3.0)
+>>> print(-p)
+(-1.0, -2.0, -3.0)
+```
+
+#### Point.\_\_bool__()
+Returns True if the point is not on the 0-coordinate, else False.
+```
+>>> p = pytrix.Point(1, 2, 3)
+>>> print(bool(p))
+True
+>>> p = pytrix.Point(0, 0, 0)
+>>> print(bool(p))
+False
+```
+
+#### Point.copy()
+Returns a new copy of this point.
+```
+>>> p = pytrix.Point(1, 2, 3)
+>>> print(id(p))
+7696578907664
+>>> print(id(p.copy()))
+7696580915024
+```
 
 ### Convenience Matrix Functions
 

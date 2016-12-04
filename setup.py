@@ -2,7 +2,7 @@ import os
 import distutils.core
 
 DEBUG_COMPILE_ARGS = None
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 NAME = "pytrix"
 
 if "DEBUG" in os.environ:
@@ -18,7 +18,7 @@ distutils.core.setup(
     author_email="warrenspencer27@gmail.com",
     url="https://github.com/warrenspe/%s" % NAME,
     download_url="https://github.com/warrenspe/%s/tarball/%s" % (NAME, VERSION),
-    keywords=['serialize', 'pickle'],
+    keywords=['vector', 'point', 'matrix'],
     classifiers=[],
     license="https://www.gnu.org/licenses/gpl-3.0.html",
     platforms=["Linux", "Windows"],
